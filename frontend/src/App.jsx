@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { fetchCommitData } from './api';
+import CommitsChart from './charts/CommitsChart';
 
 function App() {
     const [owner, setOwner] = useState('');
@@ -84,15 +85,35 @@ function App() {
             {data && (
                 <div>
                     <h2>Results for {data.repository}</h2>
-                    <h3>Raw JSON Data:</h3>
-                    <pre style={{
-                        backgroundColor: '#f5f5f5',
-                        padding: '15px',
-                        borderRadius: '4px',
-                        overflow: 'auto'
+
+                    <div style={{
+                        marginBottom: '30px',
+                        padding: '20px',
+                        backgroundColor: '#ffffff',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                     }}>
-                        {JSON.stringify(data, null, 2)}
-                    </pre>
+                        <CommitsChart
+                            dates={data.data.dates}
+                            counts={data.data.counts}
+                            repository={data.repository}
+                        />
+                    </div>
+
+                    <details style={{ marginTop: '20px' }}>
+                        <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>
+                            View Raw JSON Data
+                        </summary>
+                        <pre style={{
+                            backgroundColor: '#f5f5f5',
+                            padding: '15px',
+                            borderRadius: '4px',
+                            overflow: 'auto',
+                            marginTop: '10px'
+                        }}>
+                            {JSON.stringify(data, null, 2)}
+                        </pre>
+                    </details>
                 </div>
             )}
         </div>
