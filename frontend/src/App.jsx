@@ -28,95 +28,86 @@ function App() {
     };
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <h1>GitHub Repo Health Analyzer</h1>
+        <>
+            {/* Pixelated star background layers */}
+            <div className="stars-layer-1" />
+            <div className="stars-layer-2" />
+            <div className="stars-layer-3" />
 
-            <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-                <div style={{ marginBottom: '10px' }}>
+            <div className="app-container">
+                <h1 className="app-title">
+                    GitHub Repo <span>Health Analyzer</span>
+                </h1>
+                <p className="app-subtitle">
+                    Analyze commit activity and health metrics for any public repository
+                </p>
+
+                <form onSubmit={handleSubmit} className="search-form">
                     <input
+                        id="owner-input"
+                        className="input-field"
                         type="text"
                         placeholder="Owner (e.g., facebook)"
                         value={owner}
                         onChange={(e) => setOwner(e.target.value)}
                         required
-                        style={{
-                            padding: '8px',
-                            marginRight: '10px',
-                            width: '200px'
-                        }}
                     />
                     <input
+                        id="repo-input"
+                        className="input-field"
                         type="text"
                         placeholder="Repo (e.g., react)"
                         value={repo}
                         onChange={(e) => setRepo(e.target.value)}
                         required
-                        style={{
-                            padding: '8px',
-                            marginRight: '10px',
-                            width: '200px'
-                        }}
                     />
                     <button
+                        id="analyze-btn"
                         type="submit"
                         disabled={loading}
-                        style={{
-                            padding: '8px 16px',
-                            cursor: loading ? 'not-allowed' : 'pointer'
-                        }}
+                        className="btn-analyze"
                     >
-                        {loading ? 'Loading...' : 'Analyze'}
+                        {loading ? 'Analyzing...' : 'Analyze'}
                     </button>
-                </div>
-            </form>
+                </form>
 
-            {error && (
-                <div style={{
-                    padding: '10px',
-                    backgroundColor: '#ffebee',
-                    color: '#c62828',
-                    borderRadius: '4px',
-                    marginBottom: '20px'
-                }}>
-                    Error: {error}
-                </div>
-            )}
-
-            {data && (
-                <div>
-                    <h2>Results for {data.repository}</h2>
-
-                    <div style={{
-                        marginBottom: '30px',
-                        padding: '20px',
-                        backgroundColor: '#ffffff',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }}>
-                        <CommitsChart
-                            dates={data.data.dates}
-                            counts={data.data.counts}
-                            repository={data.repository}
-                        />
+                {loading && (
+                    <div className="loading-container">
+                        <div className="spinner" />
+                        <span className="loading-text">Fetching repository data...</span>
                     </div>
+                )}
 
-                    <details style={{ marginTop: '20px' }}>
-                        <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>
-                            View Raw JSON Data
-                        </summary>
-                        <pre style={{
-                            backgroundColor: '#f5f5f5',
-                            padding: '15px',
-                            borderRadius: '4px',
-                            overflow: 'auto',
-                            marginTop: '10px'
-                        }}>
-                            {JSON.stringify(data, null, 2)}
-                        </pre>
-                    </details>
-                </div>
-            )}
-        </div>
+                {error && (
+                    <div className="error-box">
+                        Error: {error}
+                    </div>
+                )}
+
+                {data && (
+                    <div className="results-section">
+                        <h2 className="results-title">
+                            Results for <span>{data.repository}</span>
+                        </h2>
+
+                        <div className="chart-card">
+                            <CommitsChart
+                                dates={data.data.dates}
+                                counts={data.data.counts}
+                                repository={data.repository}
+                            />
+                        </div>
+
+                        <details className="json-toggle">
+                            <summary>View Raw JSON Data</summary>
+                            <pre className="json-pre">
+                                {JSON.stringify(data, null, 2)}
+                            </pre>
+                        </details>
+                    </div>
+                )}
+            </div>
+        </>
     );
 }
 

@@ -1,0 +1,401 @@
+/* ===== CSS Reset & Base ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Blackish-blue palette */
+    --bg-deep:    #05080f;
+    --bg-mid:     #0a1128;
+    --bg-surface: #101d3a;
+    --bg-card:    rgba(16, 29, 58, 0.65);
+
+    /* Accent colours */
+    --accent:        #4ecdc4;
+    --accent-glow:   rgba(78, 205, 196, 0.25);
+    --accent-bright: #7fffe6;
+
+    /* Text */
+    --text-primary:   #e8edf5;
+    --text-secondary: #8fa4c4;
+    --text-muted:     #506380;
+
+    /* Misc */
+    --border:   rgba(78, 205, 196, 0.12);
+    --radius:   12px;
+    --radius-sm: 8px;
+    --danger:    #ff6b6b;
+    --danger-bg: rgba(255, 107, 107, 0.1);
+}
+
+/* ===== Body & Stars Background ===== */
+html, body, #root {
+    min-height: 100vh;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+}
+
+body {
+    position: relative;
+}
+
+/* --- Pixelated Star Layers ---
+   Three layers of box-shadow "stars" with different sizes, positions and
+   twinkle speeds to give a subtle parallax depth effect.               */
+
+/* Layer 1 – tiny faint stars */
+.stars-layer-1 {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    width: 1px;
+    height: 1px;
+    background: transparent;
+    box-shadow:
+        42px 38px #fff,   198px 15px #fff,   350px 85px #fff,   500px 50px #fff,
+        650px 120px #fff,  800px 30px #fff,   950px 95px #fff,  1100px 60px #fff,
+        1250px 140px #fff, 1400px 20px #fff,  1550px 110px #fff, 1700px 45px #fff,
+        75px 200px #fff,   225px 180px #fff,  380px 250px #fff,  530px 220px #fff,
+        680px 300px #fff,  830px 190px #fff,  980px 270px #fff, 1130px 210px #fff,
+        1280px 290px #fff, 1430px 175px #fff, 1580px 260px #fff, 1730px 230px #fff,
+        110px 370px #fff,  260px 340px #fff,  410px 410px #fff,  560px 380px #fff,
+        710px 460px #fff,  860px 350px #fff, 1010px 440px #fff, 1160px 365px #fff,
+        1310px 450px #fff, 1460px 335px #fff, 1610px 420px #fff, 1760px 390px #fff,
+        145px 530px #fff,  295px 500px #fff,  445px 570px #fff,  595px 540px #fff,
+        745px 620px #fff,  895px 510px #fff, 1045px 600px #fff, 1195px 525px #fff,
+        1345px 610px #fff, 1495px 495px #fff, 1645px 580px #fff, 1795px 550px #fff,
+        50px 680px #fff,   200px 710px #fff,  340px 740px #fff,  490px 700px #fff,
+        640px 770px #fff,  790px 690px #fff,  940px 760px #fff, 1090px 715px #fff,
+        1240px 780px #fff, 1390px 680px #fff, 1540px 750px #fff, 1690px 720px #fff,
+        85px 850px #fff,   235px 830px #fff,  385px 900px #fff,  535px 870px #fff,
+        685px 950px #fff,  835px 840px #fff,  985px 920px #fff, 1135px 860px #fff;
+    animation: twinkle1 4s ease-in-out infinite alternate;
+}
+
+/* Layer 2 – medium stars */
+.stars-layer-2 {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    width: 2px;
+    height: 2px;
+    background: transparent;
+    box-shadow:
+        120px 55px #fff,   310px 130px #fff,  520px 70px #fff,   730px 160px #fff,
+        940px 40px #fff,  1150px 145px #fff, 1360px 80px #fff,  1570px 170px #fff,
+        65px 300px #fff,   275px 235px #fff,  485px 310px #fff,  695px 245px #fff,
+        905px 325px #fff, 1115px 260px #fff, 1325px 340px #fff, 1535px 275px #fff,
+        180px 450px #fff,  390px 380px #fff,  600px 465px #fff,  810px 395px #fff,
+        1020px 475px #fff,1230px 410px #fff, 1440px 490px #fff, 1650px 425px #fff,
+        100px 590px #fff,  310px 530px #fff,  520px 610px #fff,  730px 545px #fff,
+        940px 625px #fff, 1150px 560px #fff, 1360px 640px #fff, 1570px 575px #fff,
+        55px 750px #fff,   265px 690px #fff,  475px 770px #fff,  685px 705px #fff,
+        895px 785px #fff, 1105px 720px #fff, 1315px 800px #fff, 1525px 735px #fff;
+    animation: twinkle2 5s ease-in-out infinite alternate;
+}
+
+/* Layer 3 – larger brighter stars */
+.stars-layer-3 {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    width: 3px;
+    height: 3px;
+    border-radius: 0;           /* keep them pixelated — no rounding */
+    background: transparent;
+    box-shadow:
+        250px  90px rgba(255,255,255,0.95),
+        580px 200px rgba(255,255,255,0.9),
+        900px 110px rgba(255,255,255,0.95),
+        1220px 280px rgba(255,255,255,0.9),
+        1540px 150px rgba(255,255,255,0.95),
+        160px 420px rgba(255,255,255,0.9),
+        480px 530px rgba(255,255,255,0.95),
+        800px 450px rgba(255,255,255,0.9),
+        1120px 550px rgba(255,255,255,0.95),
+        1440px 480px rgba(255,255,255,0.9),
+        300px 700px rgba(255,255,255,0.95),
+        620px 780px rgba(255,255,255,0.9),
+        940px 720px rgba(255,255,255,0.95),
+        1260px 810px rgba(255,255,255,0.9),
+        1580px 740px rgba(255,255,255,0.95),
+        80px  880px rgba(255,255,255,0.9),
+        700px 900px rgba(255,255,255,0.95),
+        1050px 860px rgba(255,255,255,0.9);
+    animation: twinkle3 6s ease-in-out infinite alternate;
+}
+
+/* Twinkle keyframes */
+@keyframes twinkle1 {
+    0%   { opacity: 0.4; }
+    50%  { opacity: 0.8; }
+    100% { opacity: 0.5; }
+}
+@keyframes twinkle2 {
+    0%   { opacity: 0.5; }
+    50%  { opacity: 1;   }
+    100% { opacity: 0.6; }
+}
+@keyframes twinkle3 {
+    0%   { opacity: 0.6; }
+    50%  { opacity: 1;   }
+    100% { opacity: 0.7; }
+}
+
+/* ===== App Container ===== */
+.app-container {
+    position: relative;
+    z-index: 1;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 28px 60px;
+    min-height: 100vh;
+}
+
+/* ===== Header ===== */
+.app-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.app-title span {
+    color: var(--accent);
+}
+
+.app-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 40px;
+    letter-spacing: 0.3px;
+}
+
+/* ===== Form ===== */
+.search-form {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+}
+
+.input-field {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    padding: 12px 18px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    backdrop-filter: blur(6px);
+}
+
+.input-field::placeholder {
+    color: var(--text-muted);
+}
+
+.input-field:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.btn-analyze {
+    background: linear-gradient(135deg, var(--accent), #38b2ac);
+    color: var(--bg-deep);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 28px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.4px;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.btn-analyze:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px var(--accent-glow);
+}
+
+.btn-analyze:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-analyze:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== Loading Spinner ===== */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px 0;
+}
+
+.spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+}
+
+/* ===== Error ===== */
+.error-box {
+    background: var(--danger-bg);
+    border: 1px solid rgba(255, 107, 107, 0.25);
+    border-radius: var(--radius-sm);
+    color: var(--danger);
+    padding: 14px 20px;
+    margin-bottom: 28px;
+    font-size: 0.9rem;
+    backdrop-filter: blur(6px);
+}
+
+/* ===== Results Section ===== */
+.results-section {
+    animation: fadeUp 0.5s ease-out;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.results-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.results-title span {
+    color: var(--accent);
+}
+
+/* ===== Chart Card ===== */
+.chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 28px;
+    backdrop-filter: blur(10px);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.chart-card:hover {
+    border-color: rgba(78, 205, 196, 0.25);
+    box-shadow: 0 4px 30px rgba(78, 205, 196, 0.08);
+}
+
+/* ===== Raw JSON Toggle ===== */
+.json-toggle {
+    margin-top: 24px;
+}
+
+.json-toggle summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    padding: 10px 0;
+    transition: color 0.25s;
+    list-style: none;
+}
+
+.json-toggle summary::-webkit-details-marker {
+    display: none;
+}
+
+.json-toggle summary::before {
+    content: '▸ ';
+    color: var(--accent);
+    transition: transform 0.25s;
+    display: inline-block;
+}
+
+.json-toggle[open] summary::before {
+    content: '▾ ';
+}
+
+.json-toggle summary:hover {
+    color: var(--text-primary);
+}
+
+.json-pre {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    overflow: auto;
+    margin-top: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-height: 400px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+    .app-container {
+        padding: 32px 16px 40px;
+    }
+    .app-title {
+        font-size: 1.5rem;
+    }
+    .search-form {
+        flex-direction: column;
+        align-items: center;
+    }
+    .input-field {
+        width: 100%;
+        max-width: 320px;
+    }
+    .btn-analyze {
+        width: 100%;
+        max-width: 320px;
+    }
+}
