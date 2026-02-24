@@ -29,7 +29,7 @@ function App() {
 
     return (
         <div className="app-container">
-            <h1 className="app-title">GitHub Repo Health Analyzer</h1>
+            <h1 className="app-title">GitHub Repo <span>Health Analyzer</span></h1>
             <p className="app-subtitle">
                 Analyze commit activity and health metrics for any public repository
             </p>
