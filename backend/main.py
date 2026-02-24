@@ -1,10 +1,20 @@
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from github_api import get_commits
+from dotenv import load_dotenv
+
+from github_api import get_commits, get_rate_limit
 from analysis import analyze_commits
 
+# Load environment variables
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 # Create FastAPI app
-app = FastAPI(title="GitHub Repo Health Analyzer API")
+app = FastAPI(
+    title="GitHub Repo Health Analyzer API",
+    description="Analyzes commit activity and health metrics for public GitHub repositories.",
+    version="1.0.0",
+)
 
 # Configure CORS to allow frontend requests
 app.add_middleware(
@@ -15,66 +25,79 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# ─── Endpoints ────────────────────────────────────────────────────
+
 @app.get("/")
 def root():
-    """Root endpoint to check if API is running"""
-    return {"status": "API running"}
+    """Root endpoint to check if API is running."""
+    return {"status": "API running", "version": "1.0.0"}
+
+
+@app.get("/health")
+def health():
+    """
+    Health check – reports API status and GitHub rate-limit info so the
+    frontend / developer can see if the token is configured and how many
+    requests remain.
+    """
+    rate = get_rate_limit()
+    token_set = bool(os.getenv("GITHUB_TOKEN"))
+    return {
+        "status": "healthy",
+        "github_token_configured": token_set,
+        "rate_limit": rate,
+    }
+
 
 @app.get("/test/{owner}/{repo}")
 def test_repo(owner: str, repo: str):
     """
-    Test endpoint to fetch repository commits and return basic info.
-    
+    Quick test – fetches a repo's commits and returns the count.
+
     Args:
         owner: Repository owner (username or organization)
         repo: Repository name
-    
-    Returns:
-        Dictionary with repository name and commit count
     """
-    # Fetch commits from GitHub
     commits = get_commits(owner, repo)
-    
-    # Handle API errors
+
     if commits is None:
         raise HTTPException(
             status_code=404,
-            detail=f"Could not fetch data for repository {owner}/{repo}. Please check if the repository exists."
+            detail=f"Could not fetch data for repository {owner}/{repo}. "
+                   f"Please check if the repository exists and you are not rate-limited.",
         )
-    
-    # Return repository info
+
     return {
         "repository": f"{owner}/{repo}",
-        "commit_count": len(commits)
+        "commit_count": len(commits),
     }
+
 
 @app.get("/commits/{owner}/{repo}")
 def get_commit_analysis(owner: str, repo: str):
     """
     Analyze repository commits and return daily commit counts.
-    
+
     Args:
         owner: Repository owner (username or organization)
         repo: Repository name
-    
+
     Returns:
-        Dictionary with dates and counts arrays for charting
+        JSON with dates, counts, and total_commits arrays for charting.
     """
-    # Fetch commits from GitHub
     commits = get_commits(owner, repo)
-    
-    # Handle API errors
+
     if commits is None:
         raise HTTPException(
             status_code=404,
-            detail=f"Could not fetch data for repository {owner}/{repo}. Please check if the repository exists."
+            detail=f"Could not fetch data for repository {owner}/{repo}. "
+                   f"Please check if the repository exists and you are not rate-limited.",
         )
-    
-    # Analyze commits using pandas
+
     analysis_result = analyze_commits(commits)
-    
-    # Return chart-ready data
+
     return {
         "repository": f"{owner}/{repo}",
-        "data": analysis_result
+        "data": analysis_result,
     }

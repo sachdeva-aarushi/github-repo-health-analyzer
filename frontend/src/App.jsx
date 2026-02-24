@@ -28,86 +28,77 @@ function App() {
     };
 
     return (
-        <>
-            {/* Pixelated star background layers */}
-            <div className="stars-layer-1" />
-            <div className="stars-layer-2" />
-            <div className="stars-layer-3" />
+        <div className="app-container">
+            <h1 className="app-title">GitHub Repo Health Analyzer</h1>
+            <p className="app-subtitle">
+                Analyze commit activity and health metrics for any public repository
+            </p>
 
-            <div className="app-container">
-                <h1 className="app-title">
-                    GitHub Repo <span>Health Analyzer</span>
-                </h1>
-                <p className="app-subtitle">
-                    Analyze commit activity and health metrics for any public repository
-                </p>
+            <form onSubmit={handleSubmit} className="search-form">
+                <input
+                    id="owner-input"
+                    className="input-field"
+                    type="text"
+                    placeholder="Owner (e.g., facebook)"
+                    value={owner}
+                    onChange={(e) => setOwner(e.target.value)}
+                    required
+                />
+                <input
+                    id="repo-input"
+                    className="input-field"
+                    type="text"
+                    placeholder="Repo (e.g., react)"
+                    value={repo}
+                    onChange={(e) => setRepo(e.target.value)}
+                    required
+                />
+                <button
+                    id="analyze-btn"
+                    type="submit"
+                    disabled={loading}
+                    className="btn-analyze"
+                >
+                    {loading ? 'Analyzing...' : 'Analyze'}
+                </button>
+            </form>
 
-                <form onSubmit={handleSubmit} className="search-form">
-                    <input
-                        id="owner-input"
-                        className="input-field"
-                        type="text"
-                        placeholder="Owner (e.g., facebook)"
-                        value={owner}
-                        onChange={(e) => setOwner(e.target.value)}
-                        required
-                    />
-                    <input
-                        id="repo-input"
-                        className="input-field"
-                        type="text"
-                        placeholder="Repo (e.g., react)"
-                        value={repo}
-                        onChange={(e) => setRepo(e.target.value)}
-                        required
-                    />
-                    <button
-                        id="analyze-btn"
-                        type="submit"
-                        disabled={loading}
-                        className="btn-analyze"
-                    >
-                        {loading ? 'Analyzing...' : 'Analyze'}
-                    </button>
-                </form>
+            {loading && (
+                <div className="loading-container">
+                    <div className="spinner" />
+                    <span className="loading-text">Fetching repository data...</span>
+                </div>
+            )}
 
-                {loading && (
-                    <div className="loading-container">
-                        <div className="spinner" />
-                        <span className="loading-text">Fetching repository data...</span>
+            {error && (
+                <div className="error-box">
+                    Error: {error}
+                </div>
+            )}
+
+            {data && (
+                <div className="results-section">
+                    <h2 className="results-title">
+                        Results for {data.repository}
+                    </h2>
+
+                    <div className="chart-card">
+                        <CommitsChart
+                            dates={data.data.dates}
+                            counts={data.data.counts}
+                            repository={data.repository}
+                        />
                     </div>
-                )}
 
-                {error && (
-                    <div className="error-box">
-                        Error: {error}
-                    </div>
-                )}
-
-                {data && (
-                    <div className="results-section">
-                        <h2 className="results-title">
-                            Results for <span>{data.repository}</span>
-                        </h2>
-
-                        <div className="chart-card">
-                            <CommitsChart
-                                dates={data.data.dates}
-                                counts={data.data.counts}
-                                repository={data.repository}
-                            />
-                        </div>
-
-                        <details className="json-toggle">
-                            <summary>View Raw JSON Data</summary>
-                            <pre className="json-pre">
-                                {JSON.stringify(data, null, 2)}
-                            </pre>
-                        </details>
-                    </div>
-                )}
-            </div>
-        </>
+                    <details className="json-toggle">
+                        <summary>View Raw JSON Data</summary>
+                        <pre className="json-pre">
+                            {JSON.stringify(data, null, 2)}
+                        </pre>
+                    </details>
+                </div>
+            )}
+        </div>
     );
 }
 
