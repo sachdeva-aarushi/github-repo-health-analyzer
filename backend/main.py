@@ -102,5 +102,6 @@ def get_commit_analysis(owner: str, repo: str):
     }
 @app.get("/contributors/{owner}/{repo}")
 def contributors(owner: str, repo: str):
-    data = get_contributors(owner, repo)
-    return data
+    raw_data = get_contributors(owner, repo)
+    analyzed = analyze_contributors(raw_data)
+    return analyzed

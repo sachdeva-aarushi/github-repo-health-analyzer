@@ -52,3 +52,24 @@ def analyze_commits(commits: List[Dict]) -> Dict:
         "counts": counts,
         "total_commits": len(commit_dates),
     }
+def analyze_contributors(contributors_data):
+    df = pd.DataFrame(contributors_data)
+
+    df = df[["login", "contributions"]]
+    df = df.sort_values(by="contributions", ascending=False)
+
+    total_commits = df["contributions"].sum()
+
+    df["percentage"] = (df["contributions"] / total_commits) * 100
+
+    top_contributor_pct = df.iloc[0]["percentage"]
+
+    # Bus factor: contributors needed to reach 50% of commits
+    cumulative = df["percentage"].cumsum()
+    bus_factor = (cumulative < 50).sum() + 1
+
+    return {
+        "contributors": df.to_dict(orient="records"),
+        "top_contributor_percentage": round(top_contributor_pct, 2),
+        "bus_factor": int(bus_factor)
+    }
