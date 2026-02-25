@@ -3,30 +3,29 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from github_api import get_commits, get_rate_limit
+from github_api import get_commits, get_rate_limit, get_contributors
 from analysis import analyze_commits
 
-# Load environment variables
+#Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-# Create FastAPI app
 app = FastAPI(
     title="GitHub Repo Health Analyzer API",
     description="Analyzes commit activity and health metrics for public GitHub repositories.",
     version="1.0.0",
 )
 
-# Configure CORS to allow frontend requests
+#Configure CORS to allow frontend requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend URL
+    allow_origins=["*"],  #frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# ─── Endpoints ────────────────────────────────────────────────────
+#Endpoints
 
 @app.get("/")
 def root():
@@ -101,3 +100,7 @@ def get_commit_analysis(owner: str, repo: str):
         "repository": f"{owner}/{repo}",
         "data": analysis_result,
     }
+@app.get("/contributors/{owner}/{repo}")
+def contributors(owner: str, repo: str):
+    data = get_contributors(owner, repo)
+    return data

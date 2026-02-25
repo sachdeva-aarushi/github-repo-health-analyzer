@@ -36,7 +36,7 @@ def get_commits(owner: str, repo: str, per_page: int = 100) -> Optional[List[Dic
     try:
         response = requests.get(url, params=params, headers=_get_headers(), timeout=15)
 
-        # Detect rate limiting
+        #Detect rate limiting
         if response.status_code == 403 and "rate limit" in response.text.lower():
             print("Rate Limit Error: GitHub API rate limit exceeded. "
                   "Set a GITHUB_TOKEN in .env to increase your limit.")
@@ -74,3 +74,9 @@ def get_rate_limit() -> Optional[Dict]:
         }
     except requests.exceptions.RequestException:
         return None
+
+def get_contributors(owner: str, repo: str):
+    url = f"https://api.github.com/repos/{owner}/{repo}/contributors"
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()
