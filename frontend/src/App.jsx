@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { fetchCommitData } from './api';
+import { fetchCommitData, fetchContributors } from './api';
 import CommitsChart from './charts/CommitsChart';
+import ContributorsBarChart from "./charts/ContributorsBarChart";
 
 function App() {
     const [owner, setOwner] = useState('');
@@ -8,6 +9,7 @@ function App() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [contributors, setContributors] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,8 +20,12 @@ function App() {
         setLoading(true);
 
         try {
-            const result = await fetchCommitData(owner, repo);
-            setData(result);
+            const commitResult = await fetchCommitData(owner, repo);
+            setData(commitResult);
+
+            const contributorResult = await fetchContributors(owner, repo);
+            setContributors(contributorResult);
+
         } catch (err) {
             setError(err.message);
         } finally {
@@ -96,6 +102,20 @@ function App() {
                             {JSON.stringify(data, null, 2)}
                         </pre>
                     </details>
+                    {contributors && (
+                        <div className="chart-card">
+                            <h3>Contributor Distribution</h3>
+
+                            <ContributorsBarChart
+                                data={contributors.contributors}
+                            />
+
+                            <div style={{ marginTop: "10px" }}>
+                                <p><strong>Top Contributor %:</strong> {contributors.top_contributor_percentage}%</p>
+                                <p><strong>Bus Factor:</strong> {contributors.bus_factor}</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

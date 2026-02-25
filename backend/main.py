@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from github_api import get_commits, get_rate_limit, get_contributors
-from analysis import analyze_commits
+from analysis import analyze_commits, analyze_contributors
 
 #Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
