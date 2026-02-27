@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { fetchCommitData, fetchContributors } from './api';
 import CommitsChart from './charts/CommitsChart';
 import ContributorsBarChart from "./charts/ContributorsBarChart";
+import LorenzCurveChart from "./charts/LorenzCurveChart";
 
 function App() {
     const [owner, setOwner] = useState('');
@@ -103,19 +104,29 @@ function App() {
                         </pre>
                     </details>
                     {contributors && (
-                        <div className="chart-card">
-                            <h3>Contributor Distribution</h3>
+                        <>
+                            {/* Bar Chart */}
+                            <div className="chart-card">
+                                <h3>Contributor Distribution</h3>
 
-                            <ContributorsBarChart
-                                data={contributors.contributors}
-                            />
+                                <ContributorsBarChart
+                                    data={contributors.contributors}
+                                />
 
-                            <div style={{ marginTop: "10px" }}>
-                                <p><strong>Top Contributor %:</strong> {contributors.top_contributor_percentage}%</p>
-                                <p><strong>Bus Factor:</strong> {contributors.bus_factor}</p>
+                                <div style={{ marginTop: "10px" }}>
+                                    <p><strong>Top Contributor %:</strong> {contributors.top_contributor_percentage}%</p>
+                                    <p><strong>Bus Factor:</strong> {contributors.bus_factor}</p>
+                                </div>
                             </div>
-                        </div>
+
+                            {/* Lorenz Curve */}
+                            <div className="chart-card" style={{ marginTop: "30px" }}>
+                                <h3>Contribution Inequality (Lorenz Curve)</h3>LorenzCurveChart
+                                data={contributors.lorenz_curve}
+                            </div>
+                        </>
                     )}
+
                 </div>
             )}
         </div>
