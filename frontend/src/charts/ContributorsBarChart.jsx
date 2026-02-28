@@ -1,7 +1,7 @@
 import { Bar } from "react-chartjs-2";
 import { Pie } from "react-chartjs-2";
 
-export default function ContributorsBarChart({ data }) {
+function ContributorsBarChart({ data }) {
     return (
         <Bar
             data={{
@@ -18,7 +18,8 @@ export default function ContributorsBarChart({ data }) {
 
     );
 }
-export default function ContributorsPieChart({ data }) {
+
+function ContributorsPieChart({ data }) {
     return (
         <Pie
             data={{
@@ -35,3 +36,6 @@ export default function ContributorsPieChart({ data }) {
         />
     );
 }
+
+export { ContributorsPieChart };
+export default ContributorsBarChart;

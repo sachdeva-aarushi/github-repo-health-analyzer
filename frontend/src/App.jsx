@@ -121,8 +121,10 @@ function App() {
 
                             {/* Lorenz Curve */}
                             <div className="chart-card" style={{ marginTop: "30px" }}>
-                                <h3>Contribution Inequality (Lorenz Curve)</h3>LorenzCurveChart
-                                data={contributors.lorenz_curve}
+                                <h3>Contribution Inequality (Lorenz Curve)</h3>
+                                <LorenzCurveChart
+                                    data={contributors.lorenz_curve}
+                                />
                             </div>
                         </>
                     )}
