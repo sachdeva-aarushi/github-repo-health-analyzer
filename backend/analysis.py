@@ -3,41 +3,24 @@ from typing import List, Dict
 
 
 def analyze_commits(commits: List[Dict]) -> Dict:
-    """
-    Analyze commit data and convert timestamps into daily commit counts.
-
-    Args:
-        commits: List of commit data from GitHub API
-
-    Returns:
-        Dictionary with dates and commit counts suitable for charting
-
-    Raises:
-        ValueError: If commits list is empty or data format is unexpected
-    """
     if not commits:
         return {"dates": [], "counts": [], "total_commits": 0}
 
-    # Extract commit dates from the API response
     commit_dates = []
     for commit in commits:
         try:
             timestamp = commit['commit']['author']['date']
             commit_dates.append(timestamp)
         except (KeyError, TypeError):
-            # Skip commits with missing author/date info
             continue
 
     if not commit_dates:
         return {"dates": [], "counts": [], "total_commits": 0}
 
-    # Create a DataFrame with the dates
     df = pd.DataFrame({'date': commit_dates})
 
-    # Convert to datetime
     df['date'] = pd.to_datetime(df['date'])
 
-    # Extract just the date (remove time)
     df['date'] = df['date'].dt.date
 
     # Count commits per day
@@ -46,12 +29,36 @@ def analyze_commits(commits: List[Dict]) -> Dict:
     # Convert to lists for JSON response
     dates = [str(date) for date in daily_counts.index]
     counts = daily_counts.values.tolist()
+    daily_df = pd.DataFrame({"date": dates,"count": counts})
+
+    daily_df["date"] = pd.to_datetime(daily_df["date"])
+    avg_commits_per_day = daily_df["count"].mean()
+    std_dev_commits = daily_df["count"].std()
+
+    most_active_row = daily_df.loc[daily_df["count"].idxmax()]
+    most_active_day = {"date": str(most_active_row["date"].date()),"commits": int(most_active_row["count"])}
+
+    daily_df["weekday"] = daily_df["date"].dt.day_name()
+
+    weekday_distribution = (daily_df.groupby("weekday")["count"]
+    .sum()
+    .reindex(["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"])
+    .fillna(0)
+    .astype(int)
+    .to_dict()
+)
 
     return {
-        "dates": dates,
-        "counts": counts,
-        "total_commits": len(commit_dates),
+    "dates": dates,
+    "counts": counts,
+    "total_commits": len(commit_dates),
+    "summary": {
+        "avg_commits_per_day": round(avg_commits_per_day, 2),
+        "std_dev_commits": round(std_dev_commits, 2),
+        "most_active_day": most_active_day,
+        "weekday_distribution": weekday_distribution
     }
+}
 def analyze_contributors(contributors_data):
     df = pd.DataFrame(contributors_data)
 
@@ -91,3 +98,4 @@ def analyze_contributors(contributors_data):
         "cumulative_share"
     ]].to_dict(orient="records")
 }
+
