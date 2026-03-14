@@ -3,6 +3,7 @@ import { fetchCommitData, fetchContributors } from './api';
 import CommitsChart from './charts/CommitsChart';
 import ContributorsBarChart from "./charts/ContributorsBarChart";
 import LorenzCurveChart from "./charts/LorenzCurveChart";
+import WeekdayChart from "./charts/WeekDayChart";
 
 function App() {
     const [owner, setOwner] = useState('');
@@ -124,6 +125,15 @@ function App() {
                             repository={data.repository}
                         />
                     </div>
+                    {data.data.summary && (
+                        <div className="chart-card">
+                            <h3>Weekly Commit Distribution</h3>
+
+                            <WeekdayChart
+                                data={data.data.summary.weekday_distribution}
+                            />
+                        </div>
+                    )}
 
                     <details className="json-toggle">
                         <summary>View Raw JSON Data</summary>
