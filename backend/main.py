@@ -3,8 +3,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from github_api import get_commits, get_rate_limit, get_contributors
-from analysis import analyze_commits, analyze_contributors
+from services.github_service import get_commits, get_rate_limit, get_contributors
+from analysis.commit_analysis import analyze_commits
+from analysis.contributor_analysis import analyze_contributors
 
 #Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
