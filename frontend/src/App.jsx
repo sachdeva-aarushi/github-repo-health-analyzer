@@ -4,6 +4,7 @@ import CommitsChart from './charts/CommitsChart';
 import ContributorsBarChart from "./charts/ContributorsBarChart";
 import LorenzCurveChart from "./charts/LorenzCurveChart";
 import WeekdayChart from "./charts/WeekDayChart";
+import OverviewCards from "./components/overview_cards";
 
 function App() {
     const [owner, setOwner] = useState('');
@@ -21,6 +22,7 @@ function App() {
         setData(null);
         setContributors(null);
         setLoading(true);
+        setOverview(null);
 
         try {
             const commitResult = await fetchCommitData(owner, repo);
@@ -28,6 +30,9 @@ function App() {
 
             const contributorResult = await fetchContributors(owner, repo);
             setContributors(contributorResult);
+
+            const overviewResult = await fetchRepoOverview(owner, repo);
+            setOverview(overviewResult);
 
         } catch (err) {
             setError(err.message);
@@ -113,6 +118,12 @@ function App() {
                                         ({data.data.summary.most_active_day.commits})
                                     </p>
                                 </div>
+                                {overview && (
+                                    <div className="overview-section">
+                                        <OverviewCards data={overview} />
+                                    </div>
+                                )}
+
                             </div>
                         )}
                         Results for {data.repository}
