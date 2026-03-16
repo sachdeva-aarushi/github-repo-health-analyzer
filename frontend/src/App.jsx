@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { fetchCommitData, fetchContributors } from './api';
+import { fetchCommitData, fetchContributors, fetchRepoOverview } from './api';
 import CommitsChart from './charts/CommitsChart';
 import ContributorsBarChart from "./charts/ContributorsBarChart";
 import LorenzCurveChart from "./charts/LorenzCurveChart";
@@ -13,6 +13,7 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [contributors, setContributors] = useState(null);
+    const [overview, setOverview] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
