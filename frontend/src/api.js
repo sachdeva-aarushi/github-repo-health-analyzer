@@ -50,3 +50,15 @@ export async function fetchRepoStructure(owner, repo) {
 
     return await response.json();
 }
+
+export async function fetchFileContent(owner, repo, path) {
+    const response = await fetch(
+        `http://127.0.0.1:8000/repo/file/${owner}/${repo}?path=${encodeURIComponent(path)}`
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch file content");
+    }
+
+    return await response.json();
+}

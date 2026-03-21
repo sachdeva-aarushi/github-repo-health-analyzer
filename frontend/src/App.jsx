@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { fetchCommitData, fetchContributors, fetchRepoOverview, fetchRepoStructure } from './api';
+import { fetchCommitData, fetchContributors, fetchRepoOverview, fetchRepoStructure, fetchFileContent } from './api';
 import CommitsChart from './charts/CommitsChart';
 import ContributorsBarChart from "./charts/ContributorsBarChart";
 import LorenzCurveChart from "./charts/LorenzCurveChart";
@@ -16,6 +16,8 @@ function App() {
     const [contributors, setContributors] = useState(null);
     const [overview, setOverview] = useState(null);
     const [structure, setStructure] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [fileContent, setFileContent] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -45,6 +47,25 @@ function App() {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleFileClick = async (path) => {
+        try {
+            setSelectedFile(path);
+
+            const file = await fetchFileContent(owner, repo, path);
+
+            // Decode base64 safely resolving UTF-8 characters (like emojis and non-English text)
+            const binaryStr = atob(file.content.replace(/\n/g, ""));
+            const bytes = new Uint8Array([...binaryStr].map((char) => char.charCodeAt(0)));
+            const decoded = new TextDecoder().decode(bytes);
+
+            setFileContent(decoded);
+
+        } catch (err) {
+            console.error(err);
+            setFileContent("Error loading file (might be a binary or unsupported format)");
         }
     };
 
@@ -187,8 +208,17 @@ function App() {
                     {structure && (
                         <div className="chart-card">
                             <div className="tree-container">
-                                <RepoTree data={structure} />
+                                <RepoTree data={structure} onFileClick={handleFileClick} />
                             </div>
+                        </div>
+                    )}
+                    {fileContent && (
+                        <div className="chart-card">
+                            <h3>{selectedFile}</h3>
+
+                            <pre className="file-content-box">
+                                {fileContent}
+                            </pre>
                         </div>
                     )}
 
