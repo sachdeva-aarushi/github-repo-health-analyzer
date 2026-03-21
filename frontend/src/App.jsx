@@ -186,7 +186,9 @@ function App() {
                     )}
                     {structure && (
                         <div className="chart-card">
-                            <RepoTree data={structure} />
+                            <div className="tree-container">
+                                <RepoTree data={structure} />
+                            </div>
                         </div>
                     )}
 

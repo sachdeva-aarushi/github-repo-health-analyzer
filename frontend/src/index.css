@@ -242,7 +242,8 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    word-break: break-word; /* Prevents long combo text from stretching width */
+    word-break: break-word;
+    /* Prevents long combo text from stretching width */
 }
 
 .card h2 {
@@ -266,4 +267,18 @@ body {
 .summary-card:hover {
     transform: translateY(-4px);
     transition: 0.2s ease;
+}
+
+.tree-container {
+    background: #020617;
+    color: #e2e8f0;
+    padding: 20px;
+    border-radius: 10px;
+    font-family: monospace;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.tree-container div:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
