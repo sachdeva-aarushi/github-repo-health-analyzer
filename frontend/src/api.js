@@ -1,5 +1,5 @@
 // API base URL - adjust if your backend runs on a different port
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 /**
  * Fetch commit analysis data for a repository
@@ -18,7 +18,7 @@ export async function fetchCommitData(owner, repo) {
 }
 export const fetchContributors = async (owner, repo) => {
     const response = await fetch(
-        `http://127.0.0.1:8000/contributors/${owner}/${repo}`
+        `${API_BASE_URL}/contributors/${owner}/${repo}`
     );
 
     if (!response.ok) {
@@ -30,7 +30,7 @@ export const fetchContributors = async (owner, repo) => {
 
 export async function fetchRepoOverview(owner, repo) {
     const response = await fetch(
-        `http://127.0.0.1:8000/repo/overview/${owner}/${repo}`
+        `${API_BASE_URL}/repo/overview/${owner}/${repo}`
     );
 
     if (!response.ok) {
@@ -41,7 +41,7 @@ export async function fetchRepoOverview(owner, repo) {
 }
 export async function fetchRepoStructure(owner, repo) {
     const response = await fetch(
-        `http://127.0.0.1:8000/repo/structure/${owner}/${repo}`
+        `${API_BASE_URL}/repo/structure/${owner}/${repo}`
     );
 
     if (!response.ok) {
@@ -53,7 +53,7 @@ export async function fetchRepoStructure(owner, repo) {
 
 export async function fetchFileContent(owner, repo, path) {
     const response = await fetch(
-        `http://127.0.0.1:8000/repo/file/${owner}/${repo}?path=${encodeURIComponent(path)}`
+        `${API_BASE_URL}/repo/file/${owner}/${repo}?path=${encodeURIComponent(path)}`
     );
 
     if (!response.ok) {

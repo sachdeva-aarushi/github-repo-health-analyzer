@@ -7,17 +7,21 @@ import LorenzCurveChart from '../charts/LorenzCurveChart';
 import WeekdayChart from '../charts/WeekDayChart';
 import OverviewCards from '../components/overview_cards';
 import Navbar from '../components/Navbar';
+import { fetchCommitVelocity } from "../api";
+import VelocityChart from "../charts/VelocityChart";
 
 function Dashboard() {
     const [searchParams] = useSearchParams();
     const owner = searchParams.get('owner') || '';
     const repo = searchParams.get('repo') || '';
 
+
     const [data, setData] = useState(null);
     const [contributors, setContributors] = useState(null);
     const [overview, setOverview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [velocity, setVelocity] = useState(null);
 
     useEffect(() => {
         if (!owner || !repo) return;
@@ -35,6 +39,8 @@ function Dashboard() {
                     fetchContributors(owner, repo),
                     fetchRepoOverview(owner, repo),
                 ]);
+                const vel = await fetchCommitVelocity(owner, repo);
+                setVelocity(vel.velocity);
                 setData(commitResult);
                 setContributors(contributorResult);
                 setOverview(overviewResult);
@@ -142,6 +148,12 @@ function Dashboard() {
                                 <LorenzCurveChart data={contributors.lorenz_curve} />
                             </div>
                         </>
+                    )}
+                    {velocity && (
+                        <div className="chart-card">
+                            <h3>Commit Velocity (Weekly)</h3>
+                            <VelocityChart data={velocity} />
+                        </div>
                     )}
                 </div>
             )}
