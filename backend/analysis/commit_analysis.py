@@ -83,3 +83,39 @@ def analyze_commit_velocity(commits):
         "weeks": weekly_counts.index.tolist(),
         "counts": weekly_counts.values.tolist()
     }
+
+def analyze_hot_files(owner, repo, commits, top_n=10):
+
+    file_counts = {}
+
+    # Limit to avoid rate limit
+    commits = commits[:30]
+
+    for commit in commits:
+        sha = commit.get("sha")
+
+        try:
+            details = get_commit_details(owner, repo, sha)
+
+            files = details.get("files", [])
+
+            for f in files:
+                filename = f.get("filename")
+
+                if filename:
+                    file_counts[filename] = file_counts.get(filename, 0) + 1
+
+        except Exception:
+            continue
+
+    # Sort
+    sorted_files = sorted(
+        file_counts.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )[:top_n]
+
+    return {
+        "files": [f[0] for f in sorted_files],
+        "counts": [f[1] for f in sorted_files]
+    }

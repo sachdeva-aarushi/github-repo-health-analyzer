@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from routers.structure_router import router as structure_router
 from routers.commits_router import router as commits_router
 
-from services.github_service import get_commits, get_rate_limit, get_contributors
-from analysis.commit_analysis import analyze_commits
+from services.github_service import get_commits, get_rate_limit, get_contributors, get_commit_details
+from analysis.commit_analysis import analyze_commits, analyze_hot_files
 from analysis.contributor_analysis import analyze_contributors
 
 from routers.overview_router import router as overview_router

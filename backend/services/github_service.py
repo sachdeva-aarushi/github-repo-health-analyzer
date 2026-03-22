@@ -123,3 +123,9 @@ def get_file_content(owner: str, repo: str, path: str):
     response = requests.get(url, headers=_get_headers())
     response.raise_for_status()
     return response.json()
+
+def get_commit_details(owner: str, repo: str, sha: str):
+    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}/commits/{sha}"
+    response = requests.get(url, headers=_get_headers())
+    response.raise_for_status()
+    return response.json()
