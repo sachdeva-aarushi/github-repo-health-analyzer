@@ -27,7 +27,7 @@ app.include_router(structure_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  #frontend URL
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

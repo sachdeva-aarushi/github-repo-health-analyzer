@@ -59,3 +59,27 @@ def analyze_commits(commits: List[Dict]) -> Dict:
         "weekday_distribution": weekday_distribution
     }
 }
+def analyze_commit_velocity(commits):
+    if not commits:
+        return {}
+
+    commit_dates = []
+
+    for commit in commits:
+        try:
+            timestamp = commit['commit']['author']['date']
+            commit_dates.append(timestamp)
+        except (KeyError, TypeError):
+            continue
+
+    df = pd.DataFrame({'date': pd.to_datetime(commit_dates)})
+
+    # Convert to week
+    df['week'] = df['date'].dt.to_period('W').astype(str)
+
+    weekly_counts = df['week'].value_counts().sort_index()
+
+    return {
+        "weeks": weekly_counts.index.tolist(),
+        "counts": weekly_counts.values.tolist()
+    }
