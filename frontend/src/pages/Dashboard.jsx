@@ -8,7 +8,7 @@ import WeekdayChart from '../charts/WeekDayChart';
 import OverviewCards from '../components/overview_cards';
 import Navbar from '../components/Navbar';
 import { fetchCommitVelocity } from "../api";
-import VelocityChart from "../charts/VelocityChart";
+import VelocityChart from "../charts/velocitycharts";
 
 function Dashboard() {
     const [searchParams] = useSearchParams();

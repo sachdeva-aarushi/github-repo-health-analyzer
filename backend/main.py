@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from routers.structure_router import router as structure_router
+from routers.commits_router import router as commits_router
 
 from services.github_service import get_commits, get_rate_limit, get_contributors
 from analysis.commit_analysis import analyze_commits
@@ -22,6 +23,7 @@ app = FastAPI(
 #Include routers
 app.include_router(overview_router)
 app.include_router(structure_router)
+app.include_router(commits_router)
 
 #Configure CORS to allow frontend requests
 app.add_middleware(

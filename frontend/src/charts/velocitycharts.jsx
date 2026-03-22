@@ -1,26 +1,56 @@
 import {
-    LineChart, Line, XAxis, YAxis,
-    Tooltip, CartesianGrid, ResponsiveContainer
-} from "recharts";
+    Chart as ChartJS,
+    LineElement,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    Tooltip,
+    Legend
+} from "chart.js";
+
+import { Line } from "react-chartjs-2";
+
+ChartJS.register(
+    LineElement,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    Tooltip,
+    Legend
+);
 
 export default function VelocityChart({ data }) {
+    if (!data || !data.weeks || data.weeks.length === 0) {
+        return <p style={{ color: '#94a3b8', textAlign: 'center' }}>No velocity data available.</p>;
+    }
 
-    const chartData = data.weeks.map((week, i) => ({
-        week,
-        commits: data.counts[i]
-    }));
+    const chartData = {
+        labels: data.weeks,
+        datasets: [
+            {
+                label: "Commits per Week",
+                data: data.counts,
+                tension: 0.3,
+                fill: false
+            }
+        ]
+    };
 
-    return (
-        <div style={{ width: "100%", height: 300 }}>
-            <ResponsiveContainer>
-                <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="week" hide />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="commits" />
-                </LineChart>
-            </ResponsiveContainer>
-        </div>
-    );
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    display: false // hides messy week labels
+                }
+            }
+        }
+    };
+
+    return <Line data={chartData} options={options} />;
 }

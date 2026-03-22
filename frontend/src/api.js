@@ -62,3 +62,15 @@ export async function fetchFileContent(owner, repo, path) {
 
     return await response.json();
 }
+
+export async function fetchCommitVelocity(owner, repo) {
+    const response = await fetch(
+        `${API_BASE_URL}/commit-velocity/${owner}/${repo}`
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch commit velocity data");
+    }
+
+    return await response.json();
+}
