@@ -74,3 +74,15 @@ export async function fetchCommitVelocity(owner, repo) {
 
     return await response.json();
 }
+
+export async function fetchHotFiles(owner, repo) {
+    const response = await fetch(
+        `${API_BASE_URL}/hot-files/${owner}/${repo}`
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch hot files data");
+    }
+
+    return await response.json();
+}
