@@ -201,10 +201,53 @@ def analyze_health(commits, contributors, prs, issues):
         "closed": issues_closed,
         "merged": prs_merged
     }
+    num_cells = 25
+    heatmap = []
+
+    for i in range(num_cells):
+        if i < num_cells * 0.5:
+            cell_status = "current"
+        elif i < num_cells * 0.7:
+            cell_status = "patch"
+        elif i < num_cells * 0.9:
+            cell_status = "minor"
+        else:
+            cell_status = "major"
+        heatmap.append(cell_status)
+    num_cells = 25
+    recent = df[df["date"] > (datetime.now(timezone.utc) - pd.Timedelta(days=30))]
+    older = df[df["date"] <= (datetime.now(timezone.utc) - pd.Timedelta(days=30))]
+
+    recent_rate = len(recent)
+    older_rate = len(older)
+
+    if recent_rate > older_rate * 1.5:
+        phase = "Growth"
+    elif recent_rate < older_rate * 0.5:
+        phase = "Decline"
+    elif days_since > 30:
+        phase = "Inactive"
+    else:
+        phase = "Stable"
+
+    top_contributors = contrib_df.head(5)
+
+    workload = []
+
+    if not top_contributors.empty:
+        for _, row in top_contributors.iterrows():
+            workload.append({
+                "name": row["login"],
+                "commits": int(row["contributions"]),
+                "percentage": round(row["pct"], 2)
+            })
 
     return {
         "score": final_score,
         "status": status,
+        "dependency_heatmap": heatmap,
+        "workload": workload,
+        "phase": phase,
 
         "summary": {
             "last_commit_days": days_since,

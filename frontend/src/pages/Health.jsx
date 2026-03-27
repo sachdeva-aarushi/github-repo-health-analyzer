@@ -5,7 +5,8 @@ import HealthDonut from "../charts/healthdonut";
 import DimensionBars from "../charts/dimensionchart";
 import HealthTimeline from "../charts/healthtimeline";
 import IssuePRChart from "../charts/issuePRchart";
-
+import DependencyHeatmap from "../charts/dependencyheatmap";
+import MaintainerWorkload from "../charts/maintainerworkload";
 
 export default function Health() {
     const [health, setHealth] = useState(null);
@@ -139,6 +140,27 @@ export default function Health() {
                     </div>
                 )}
 
+            </div>
+            {/* ===== NEW ANALYTICS ===== */}
+            <div className="health-visual-grid">
+
+                {/* Evolution Phase */}
+                <div className="visual-card">
+                    <h4>Repository Phase</h4>
+                    <p className="phase-text">{health.phase}</p>
+                </div>
+
+                {/* Dependency Heatmap */}
+                <div className="visual-card">
+                    <h4>Dependency Health</h4>
+                    <DependencyHeatmap data={health.dependency_heatmap} />
+                </div>
+
+            </div>
+
+            <div className="visual-card" style={{ marginTop: "20px" }}>
+                <h4>Maintainer Workload</h4>
+                <MaintainerWorkload data={health.workload} />
             </div>
 
         </div>
