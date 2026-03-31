@@ -11,6 +11,7 @@ from analysis.contributor_analysis import analyze_contributors
 
 from routers.overview_router import router as overview_router
 from routers.health_router import router as health_router
+from routers import risk_router
 
 #Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -26,6 +27,7 @@ app.include_router(overview_router)
 app.include_router(structure_router)
 app.include_router(commits_router)
 app.include_router(health_router)
+app.include_router(risk_router)
 
 #Configure CORS to allow frontend requests
 app.add_middleware(
