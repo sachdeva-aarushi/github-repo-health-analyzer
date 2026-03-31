@@ -17,7 +17,7 @@ export default function RiskIssueChart({ data }) {
         <div className={`risk-card border-${levelColor}`}>
             <div className="risk-card-header">
                 <div className="risk-card-title-container">
-                    <span>🐞</span> Issue Accumulation Risk
+                    Issue Accumulation Risk
                 </div>
                 <span className={`risk-badge bg-${levelColor}-light`}>{data.level}</span>
             </div>

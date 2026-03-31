@@ -20,12 +20,12 @@ const SectionTitle = ({ children }) => (
     </div>
 );
 
-const RiskCard = ({ title, level, value, icon }) => {
+const RiskCard = ({ title, level, value }) => {
     const levelColor = level === "HIGH" ? "red" : level === "MEDIUM" ? "orange" : "green";
     return (
         <div className={`risk-summary-card border-${levelColor}`}>
             <div className="risk-summary-title">
-                <span>{icon}</span> {title}
+                {title}
             </div>
             <div className={`risk-summary-level text-${levelColor}`}>{level}</div>
             <div className="risk-summary-value">{value}</div>
@@ -53,11 +53,11 @@ const Risk = () => {
 
             <div className="risk-page-container" style={{ padding: 0, marginTop: '24px' }}>
                 <div className="risk-summary-grid">
-                    <RiskCard title="Bus Factor" icon="🧍" {...summary.bus_factor} />
-                    <RiskCard title="PR Backlog" icon="🔥" {...summary.pr_backlog} />
-                    <RiskCard title="Trend Risk" icon="📉" {...summary.trend} />
-                    <RiskCard title="Maintainer Load" icon="⚖️" {...summary.maintainer_load} />
-                    <RiskCard title="Responsiveness" icon="⏳" {...summary.responsiveness} />
+                    <RiskCard title="Bus Factor" {...summary.bus_factor} />
+                    <RiskCard title="PR Backlog" {...summary.pr_backlog} />
+                    <RiskCard title="Trend Risk" {...summary.trend} />
+                    <RiskCard title="Maintainer Load" {...summary.maintainer_load} />
+                    <RiskCard title="Responsiveness" {...summary.responsiveness} />
                 </div>
 
                 <section>

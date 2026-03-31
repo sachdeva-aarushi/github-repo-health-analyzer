@@ -19,7 +19,7 @@ export default function RiskBusFactorChart({ data }) {
         <div className={`risk-card border-${levelColor}`}>
             <div className="risk-card-header">
                 <div className="risk-card-title-container">
-                    <span>🧍</span> Bus Factor Risk
+                    Bus Factor Risk
                 </div>
                 <span className={`risk-badge bg-${levelColor}-light`}>{data.level}</span>
             </div>
@@ -33,18 +33,6 @@ export default function RiskBusFactorChart({ data }) {
                 </div>
             </div>
 
-            <div className="metric-boxes">
-                <div className="metric-box">
-                    <div className="metric-box-title">Bus Factor</div>
-                    <div className="metric-box-value text-red">{data.bus_factor}</div>
-                    <div className="metric-box-sub">critical threshold</div>
-                </div>
-                <div className="metric-box">
-                    <div className="metric-box-title">Top-2 Ownership</div>
-                    <div className="metric-box-value text-red">{data.top_contributor_pct}%</div>
-                    <div className="metric-box-sub">of all commits</div>
-                </div>
-            </div>
         </div>
     );
 }

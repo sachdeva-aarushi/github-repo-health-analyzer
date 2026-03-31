@@ -12,7 +12,7 @@ export default function RiskResponsivenessChart({ data }) {
         <div className="risk-card border-orange">
             <div className="risk-card-header">
                 <div className="risk-card-title-container">
-                    <span>⏳</span> Responsiveness Risk
+                    Responsiveness Risk
                 </div>
                 <span className="risk-badge bg-orange-light">MEDIUM</span>
             </div>
@@ -34,18 +34,6 @@ export default function RiskResponsivenessChart({ data }) {
                 ))}
             </div>
 
-            <div className="metric-boxes" style={{ marginTop: '0' }}>
-                <div className="metric-box">
-                    <div className="metric-box-title">Response SLA</div>
-                    <div className="metric-box-value text-orange">48h</div>
-                    <div className="metric-box-sub">target not met</div>
-                </div>
-                <div className="metric-box">
-                    <div className="metric-box-title">P95 Merge Time</div>
-                    <div className="metric-box-value text-red">18d</div>
-                    <div className="metric-box-sub">critical outlier</div>
-                </div>
-            </div>
         </div>
     );
 }

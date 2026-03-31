@@ -16,7 +16,7 @@ export default function RiskActivityChart({ data }) {
         <div className={`risk-card border-${levelColor}`}>
             <div className="risk-card-header">
                 <div className="risk-card-title-container">
-                    <span>💤</span> Activity Drop Risk
+                    Activity Drop Risk
                 </div>
                 <span className={`risk-badge bg-${levelColor}-light`}>{data.level}</span>
             </div>
@@ -28,22 +28,6 @@ export default function RiskActivityChart({ data }) {
                 <Line data={chartData} options={{ maintainAspectRatio: false }} />
             </div>
 
-            <div className="metric-boxes">
-                <div className="metric-box">
-                    <div className="metric-box-title">Days Since Commit</div>
-                    <div className="metric-box-value text-green">
-                        {data.last_commit ? "3" : "N/A"}
-                    </div>
-                    <div className="metric-box-sub">healthy threshold</div>
-                </div>
-                <div className="metric-box">
-                    <div className="metric-box-title">Commits This Month</div>
-                    <div className="metric-box-value" style={{ color: '#1e293b' }}>
-                        62
-                    </div>
-                    <div className="metric-box-sub text-green" style={{ fontWeight: 700 }}>↓ 8% vs last mo</div>
-                </div>
-            </div>
         </div>
     );
 }

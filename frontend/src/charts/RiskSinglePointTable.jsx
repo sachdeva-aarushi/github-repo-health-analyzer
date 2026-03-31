@@ -1,11 +1,11 @@
 export default function RiskSinglePointTable({ data }) {
     if (!data) return null;
-    const risky = data.contributors.filter(c => c.percentage > 20).slice(0, 5);
+    const risky = (data.contributors || []).filter(c => c && c.percentage > 20).slice(0, 5);
     return (
         <div className="risk-card border-red">
             <div className="risk-card-header">
                 <div className="risk-card-title-container">
-                    <span>⚠️</span> Single Point of Failure
+                    Single Point of Failure
                 </div>
                 <span className="risk-badge bg-red-light">HIGH</span>
             </div>
@@ -25,12 +25,12 @@ export default function RiskSinglePointTable({ data }) {
                         <tr key={i}>
                             <td className="contributor-cell">
                                 <div className="avatar-circle">
-                                    {c.login.substring(0, 2).toUpperCase()}
+                                    {(c.login || "").substring(0, 2).toUpperCase() || "??"}
                                 </div>
-                                {c.login}
+                                {c.login || "Unknown"}
                             </td>
                             <td style={{ color: '#ef4444', fontFamily: 'monospace', fontWeight: 700 }}>
-                                {c.percentage.toFixed(1)}%
+                                {(c.percentage || 0).toFixed(1)}%
                             </td>
                             <td style={{ textAlign: 'right' }}>
                                 <span className="risk-badge bg-red-light" style={{ padding: '6px 12px' }}>Critical</span>
@@ -44,9 +44,6 @@ export default function RiskSinglePointTable({ data }) {
                     )}
                 </tbody>
             </table>
-            <div className="alert-box">
-                <div><strong>⚠️ Alert:</strong> Top contributors dominate majority of work. Knowledge distribution is limited. No documented bus-factor mitigation found.</div>
-            </div>
         </div>
     );
 }
