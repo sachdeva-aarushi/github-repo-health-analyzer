@@ -5,9 +5,9 @@ export default function RiskPRChart({ data }) {
     if (!data) return null;
 
     const chartData = {
-        labels: ["W1", "W2", "W3", "W4"],
+        labels: ["Current"],
         datasets: [
-            { label: "Open PRs", data: [40, 60, 90, data.open_prs], borderColor: "#3b82f6", backgroundColor: "rgba(59, 130, 246, 0.1)", fill: true, tension: 0.3 }
+            { label: "Open PRs", data: [data.open_prs], borderColor: "#3b82f6", backgroundColor: "rgba(59, 130, 246, 0.1)", fill: true, tension: 0.3 }
         ]
     };
 

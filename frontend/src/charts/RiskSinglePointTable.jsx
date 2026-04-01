@@ -1,3 +1,4 @@
+
 export default function RiskSinglePointTable({ data }) {
     if (!data) return null;
     const risky = (data.contributors || []).filter(c => c && c.percentage > 20).slice(0, 5);

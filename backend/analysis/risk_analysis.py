@@ -45,12 +45,21 @@ def compute_pr_risk(prs: List[Dict]) -> Dict:
         merge_ratio = closed_count / (open_count + closed_count)
 
     # scoring
-    if open_count > 150 or merge_ratio < 0.4:
-        score = 85
-    elif open_count > 75:
-        score = 60
+    total_prs = open_count + closed_count
+    if total_prs > 0 and total_prs < 20:
+        if merge_ratio < 0.4:
+            score = 85
+        elif merge_ratio < 0.6:
+            score = 60
+        else:
+            score = 30
     else:
-        score = 30
+        if open_count > 150 or (total_prs > 0 and merge_ratio < 0.4):
+            score = 85
+        elif open_count > 75:
+            score = 60
+        else:
+            score = 30
 
     insights = []
     if open_count > 100:
@@ -81,12 +90,21 @@ def compute_issue_risk(issues: List[Dict]) -> Dict:
     else:
         close_ratio = closed_count / (open_count + closed_count)
 
-    if open_count > 300 or close_ratio < 0.5:
-        score = 85
-    elif open_count > 150:
-        score = 60
+    total_issues = open_count + closed_count
+    if total_issues > 0 and total_issues < 20:
+        if close_ratio < 0.5:
+            score = 85
+        elif close_ratio < 0.7:
+            score = 60
+        else:
+            score = 30
     else:
-        score = 30
+        if open_count > 300 or (total_issues > 0 and close_ratio < 0.5):
+            score = 85
+        elif open_count > 150:
+            score = 60
+        else:
+            score = 30
 
     insights = []
     if open_count > 200:
@@ -109,7 +127,6 @@ def compute_activity_risk(commits: List[Dict]) -> Dict:
 
     latest_commit = commits[0]["commit"]["author"]["date"]
 
-    # simple heuristic (you can refine later)
     score = 30
 
     return {

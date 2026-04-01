@@ -76,7 +76,7 @@ def get_rate_limit() -> Optional[Dict]:
         return None
 
 def get_contributors(owner: str, repo: str):
-    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}/contributors"
+    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}/contributors?per_page=100"
     response = requests.get(url, headers=_get_headers())
     response.raise_for_status()
     return response.json()
@@ -90,7 +90,7 @@ def get_repo_metadata(owner: str, repo: str):
 
 
 def get_pull_requests(owner: str, repo: str):
-    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls?state=all"
+    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls?state=all&per_page=100"
     response = requests.get(url, headers=_get_headers())
     response.raise_for_status()
     return response.json()
@@ -102,7 +102,7 @@ def get_repo_languages(owner: str, repo: str):
     return response.json()
 
 def get_issues(owner: str, repo: str):
-    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}/issues?state=all"
+    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}/issues?state=all&per_page=100"
     response = requests.get(url, headers=_get_headers())
     response.raise_for_status()
     return response.json()

@@ -5,9 +5,9 @@ export default function RiskIssueChart({ data }) {
     if (!data) return null;
 
     const chartData = {
-        labels: ["W1", "W2", "W3", "W4"],
+        labels: ["Current"],
         datasets: [
-            { label: "Open Issues", data: [100, 140, 180, data.open_issues], borderColor: "#ef4444", backgroundColor: "rgba(239, 68, 68, 0.1)", fill: true, tension: 0.3 }
+            { label: "Open Issues", data: [data.open_issues], borderColor: "#ef4444", backgroundColor: "rgba(239, 68, 68, 0.1)", fill: true, tension: 0.3 }
         ]
     };
 
