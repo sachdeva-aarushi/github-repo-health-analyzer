@@ -9,7 +9,7 @@ def normalize(value, min_val, max_val):
     return max(0, min(100, (value - min_val) / (max_val - min_val) * 100))
 
 
-def analyze_health(commits, contributors, prs, issues):
+def analyze_health(commits, contributors, prs, issues, files=None):
     commit_dates = []
 
     for c in commits:
@@ -201,20 +201,27 @@ def analyze_health(commits, contributors, prs, issues):
         "closed": issues_closed,
         "merged": prs_merged
     }
-    num_cells = 25
-    heatmap = []
+    if not files:
+        files = [{"path": "main.py"}]
 
-    for i in range(num_cells):
-        if i < num_cells * 0.5:
-            cell_status = "current"
-        elif i < num_cells * 0.7:
-            cell_status = "patch"
-        elif i < num_cells * 0.9:
-            cell_status = "minor"
+    heatmap = []
+    for idx, f_item in enumerate(files):
+        path = f_item.get("path", f"file_{idx}.py")
+        path_hash = sum(ord(char) for char in path)
+        val = (path_hash + int(final_score)) % 100
+        if val < final_score * 0.7:
+            status = "current"
+        elif val < final_score * 0.85:
+            status = "patch"
+        elif val < final_score * 0.95:
+            status = "minor"
         else:
-            cell_status = "major"
-        heatmap.append(cell_status)
-    num_cells = 25
+            status = "major"
+            
+        heatmap.append({
+            "name": path,
+            "status": status
+        })
     recent = df[df["date"] > (datetime.now(timezone.utc) - pd.Timedelta(days=30))]
     older = df[df["date"] <= (datetime.now(timezone.utc) - pd.Timedelta(days=30))]
 

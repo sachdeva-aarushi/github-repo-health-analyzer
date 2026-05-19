@@ -66,11 +66,6 @@ function Structure() {
     return (
         <div className="app-container">
             <Navbar owner={owner} repo={repo} />
-
-            <h1 className="app-title">
-                Structure — <span>{owner}/{repo}</span>
-            </h1>
-
             {loading && (
                 <div className="loading-container">
                     <div className="spinner" />
@@ -93,12 +88,12 @@ function Structure() {
                         />
                     </aside>
                     <main className="dashboard-main-content">
-                        <div className="chart-card">
+                        <div className="chart-card border-shade-1 card-border-shade-1">
                             <RepoTree data={structure} onFileClick={handleFileClick} />
                         </div>
 
                         {fileContent && (
-                            <div className="chart-card" style={{ marginTop: '20px' }}>
+                            <div className="chart-card border-shade-2 card-border-shade-2" style={{ marginTop: '20px' }}>
                                 <h3 style={{ marginBottom: '12px', color: '#4ecdc4' }}>{selectedFile}</h3>
                                 <pre className="file-content-box">{fileContent}</pre>
                             </div>

@@ -60,11 +60,6 @@ function Dashboard() {
     return (
         <div className="app-container">
             <Navbar owner={owner} repo={repo} />
-
-            <h1 className="app-title">
-                Dashboard — <span>{owner}/{repo}</span>
-            </h1>
-
             {loading && (
                 <div className="loading-container">
                     <div className="spinner" />
@@ -86,25 +81,25 @@ function Dashboard() {
                     {/* Summary metric cards */}
                     {data.data.summary && (
                         <div className="summary-cards">
-                            <div className="risk-summary-card border-blue">
+                            <div className="risk-summary-card border-shade-1 card-border-shade-1">
                                 <div className="risk-summary-title">Avg Commits / Day</div>
                                 <div className="risk-summary-level">{data.data.summary.avg_commits_per_day}</div>
                             </div>
-                            <div className="risk-summary-card border-orange">
+                            <div className="risk-summary-card border-shade-2 card-border-shade-2">
                                 <div className="risk-summary-title">Commit Std Dev</div>
                                 <div className="risk-summary-level">{data.data.summary.std_dev_commits}</div>
                             </div>
                             {overview && (
                                 <>
-                                    <div className="risk-summary-card border-green">
+                                    <div className="risk-summary-card border-shade-3 card-border-shade-3">
                                         <div className="risk-summary-title">Stars</div>
                                         <div className="risk-summary-level">{overview.stars}</div>
                                     </div>
-                                    <div className="risk-summary-card border-blue">
+                                    <div className="risk-summary-card border-shade-4 card-border-shade-4">
                                         <div className="risk-summary-title">Files</div>
                                         <div className="risk-summary-level">{overview.total_files}</div>
                                     </div>
-                                    <div className="risk-summary-card border-orange">
+                                    <div className="risk-summary-card border-shade-5 card-border-shade-5">
                                         <div className="risk-summary-title">Folders</div>
                                         <div className="risk-summary-level">{overview.total_folders}</div>
                                     </div>
@@ -114,7 +109,7 @@ function Dashboard() {
                     )}
 
                     <div className="dashboard-graphs-grid">
-                        <div className="risk-card">
+                        <div className="risk-card border-shade-1 card-border-shade-1">
                             <div className="risk-card-header">
                                 <div className="risk-card-title-container">Commit Activity</div>
                             </div>
@@ -128,7 +123,7 @@ function Dashboard() {
                         </div>
 
                         {data.data.summary && (
-                            <div className="risk-card">
+                            <div className="risk-card border-shade-2 card-border-shade-2">
                                 <div className="risk-card-header">
                                     <div className="risk-card-title-container">Weekly Commit Distribution</div>
                                 </div>
@@ -139,7 +134,7 @@ function Dashboard() {
                         )}
 
                         {contributors && (
-                            <div className="risk-card">
+                            <div className="risk-card border-shade-3 card-border-shade-3">
                                 <div className="risk-card-header">
                                     <div className="risk-card-title-container">Contributor Distribution</div>
                                 </div>
@@ -154,7 +149,7 @@ function Dashboard() {
                         )}
 
                         {velocity && (
-                            <div className="risk-card">
+                            <div className="risk-card border-shade-4 card-border-shade-4">
                                 <div className="risk-card-header">
                                     <div className="risk-card-title-container">Commit Velocity (Weekly)</div>
                                 </div>
@@ -167,7 +162,7 @@ function Dashboard() {
 
                     {/* Lorenz Curve at the bottom */}
                     {contributors && (
-                        <div className="risk-card" style={{ marginTop: '24px' }}>
+                        <div className="risk-card border-shade-5 card-border-shade-5" style={{ marginTop: '24px' }}>
                             <div className="risk-card-header">
                                 <div className="risk-card-title-container">Contribution Inequality (Lorenz Curve)</div>
                             </div>

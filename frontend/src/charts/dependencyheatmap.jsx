@@ -1,4 +1,4 @@
-export default function DependencyHeatmap({ data }) {
+export default function DependencyHeatmap({ data, repo }) {
 
     const getStatusInfo = (status) => {
         switch (status) {
@@ -10,15 +10,6 @@ export default function DependencyHeatmap({ data }) {
         }
     };
 
-    // Realistic-sounding mock dependencies
-    const mockDeps = [
-        "react", "react-dom", "axios", "lodash", "express", 
-        "mongoose", "webpack", "babel-core", "jest", "eslint",
-        "typescript", "next", "tailwindcss", "framer-motion", "chart.js",
-        "d3", "three", "redux", "recoil", "zustand",
-        "socket.io", "graphql", "apollo-client", "prisma", "pg"
-    ];
-
     const legendItems = [
         { label: "Healthy", color: "#27D3FF" },
         { label: "Stable", color: "#53A8FF" },
@@ -27,20 +18,24 @@ export default function DependencyHeatmap({ data }) {
         { label: "Critical", color: "#0A2239" },
     ];
 
+    if (!data || data.length === 0) {
+        return <div style={{ color: '#9CB3CC', textAlign: 'center', padding: '20px 0' }}>No files found to map</div>;
+    }
+
     return (
         <div>
-            <div className="heatmap-grid">
+            <div className="heatmap-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(32px, 1fr))', gap: '6px' }}>
                 {data.map((cell, i) => {
-                    const info = getStatusInfo(cell);
-                    const depName = mockDeps[i] || `Dependency ${i + 1}`;
+                    const info = getStatusInfo(cell.status);
+                    const depName = cell.name;
                     return (
                         <div
                             key={i}
                             className="heatmap-cell"
-                            style={{ background: info.color }}
+                            style={{ background: info.color, height: '32px', width: '100%', borderRadius: '4px' }}
                         >
                             <div className="heatmap-tooltip">
-                                <div className="heatmap-tooltip-title">{depName}</div>
+                                <div className="heatmap-tooltip-title" style={{ maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{depName}</div>
                                 <div className="heatmap-tooltip-status" style={{ color: info.color }}>
                                     {info.label} • {info.risk}
                                 </div>

@@ -34,8 +34,8 @@ export default function IssuePRChart({ data }) {
             {
                 label: "Issues Closed",
                 data: months.map(m => data.closed[m] || 0),
-                backgroundColor: "rgba(31, 174, 122, 0.6)",
-                borderColor: "#1FAE7A",
+                backgroundColor: "rgba(0, 216, 255, 0.6)",
+                borderColor: "#00D8FF",
                 borderWidth: 1,
                 borderRadius: 3,
             },

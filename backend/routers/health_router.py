@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from services.github_service import (get_commits,get_contributors,get_pull_requests,get_issues)
+from services.github_service import (get_commits,get_contributors,get_pull_requests,get_issues,get_repo_tree)
 from analysis.health_analysis import analyze_health
 router = APIRouter(
     prefix="/repo",
@@ -34,13 +34,20 @@ def get_repo_health(owner: str, repo: str):
             issues = []
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch issues: {str(e)}")
+
+    try:
+        tree_data = get_repo_tree(owner, repo)
+        files = [item for item in tree_data.get("tree", []) if item.get("type") == "blob"]
+    except Exception:
+        files = []
     
     try:
         health = analyze_health(
             commits=commits,
             contributors=contributors,
             prs=prs,
-            issues=issues
+            issues=issues,
+            files=files
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to analyze health: {str(e)}")

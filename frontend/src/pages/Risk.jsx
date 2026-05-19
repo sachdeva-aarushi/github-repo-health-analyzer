@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from 'react-router-dom';
 import { getRisk } from "../api";
 import Navbar from '../components/Navbar';
 import AIChatPanel from '../components/ai/AIChatPanel';
@@ -28,28 +29,29 @@ const SectionTitle = ({ children }) => (
     </div>
 );
 
-const RiskCard = ({ title, level, value }) => {
+const RiskCard = ({ title, level, value, shadeIndex }) => {
     const levelColor = level === "HIGH" ? "red" : level === "MEDIUM" ? "orange" : "green";
     return (
-        <div className={`risk-summary-card border-${levelColor}`}>
+        <div className={`risk-summary-card border-shade-${shadeIndex} card-border-shade-${shadeIndex}`}>
             <div className="risk-summary-title">
                 {title}
             </div>
             <div className={`risk-summary-level text-${levelColor}`}>{level}</div>
-            <div className="risk-summary-value">{value}</div>
         </div>
     );
 };
 
 const Risk = () => {
+    const [searchParams] = useSearchParams();
+    const owner = searchParams.get('owner') || '';
+    const repo = searchParams.get('repo') || '';
+
     const [data, setData] = useState(null);
 
-    const owner = "facebook";
-    const repo = "react";
-
     useEffect(() => {
+        if (!owner || !repo) return;
         getRisk(owner, repo).then(res => setData(res));
-    }, []);
+    }, [owner, repo]);
 
     if (!data) return <div style={{ padding: '24px', color: '#64748b' }}>Loading risk analysis...</div>;
 
@@ -69,13 +71,13 @@ const Risk = () => {
                     />
                 </aside>
                 <main className="dashboard-main-content">
-                    <div className="risk-page-container" style={{ padding: 0 }}>
+                    <div className="risk-page-container" style={{ padding: 0, marginTop: '0px' }}>
                 <div className="risk-summary-grid">
-                    <RiskCard title="Bus Factor" {...summary.bus_factor} />
-                    <RiskCard title="PR Backlog" {...summary.pr_backlog} />
-                    <RiskCard title="Trend Risk" {...summary.trend} />
-                    <RiskCard title="Maintainer Load" {...summary.maintainer_load} />
-                    <RiskCard title="Responsiveness" {...summary.responsiveness} />
+                    <RiskCard title="Bus Factor" {...summary.bus_factor} shadeIndex={1} />
+                    <RiskCard title="PR Backlog" {...summary.pr_backlog} shadeIndex={2} />
+                    <RiskCard title="Trend Risk" {...summary.trend} shadeIndex={3} />
+                    <RiskCard title="Maintainer Load" {...summary.maintainer_load} shadeIndex={4} />
+                    <RiskCard title="Responsiveness" {...summary.responsiveness} shadeIndex={5} />
                 </div>
 
                 <section>

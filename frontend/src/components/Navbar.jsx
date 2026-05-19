@@ -8,10 +8,15 @@ function Navbar({ owner, repo }) {
     return (
         <nav className="navbar">
             <div className="navbar-brand">
-                <NavLink to={`/${query}`} className="navbar-logo">
-                    Repo Analyzer
+                <NavLink to="/" className="navbar-logo">
+                    GitIntel
                 </NavLink>
             </div>
+            {owner && repo && (
+                <div className="navbar-repo-name">
+                    {owner} / <span>{repo}</span>
+                </div>
+            )}
             <div className="navbar-links">
                 <NavLink
                     to={`/dashboard${query}`}

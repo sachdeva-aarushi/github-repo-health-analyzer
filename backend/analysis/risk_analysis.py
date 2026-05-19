@@ -178,33 +178,126 @@ def compute_activity_risk(commits: List[Dict]) -> Dict:
     }
 
 
+def compute_responsiveness(prs: List[Dict], issues: List[Dict]) -> Dict:
+    first_response_times = []
+    merge_times = []
+    close_times = []
+    now = datetime.now(timezone.utc)
+    stale_prs = 0
+
+    for pr in prs:
+        try:
+            created = datetime.strptime(pr["created_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            if pr.get("merged_at"):
+                merged = datetime.strptime(pr["merged_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                merge_times.append((merged - created).total_seconds() / 3600)
+            if pr.get("closed_at"):
+                closed = datetime.strptime(pr["closed_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                first_response_times.append((closed - created).total_seconds() / 3600)
+            if pr["state"] == "open" and (now - created).days > 30:
+                stale_prs += 1
+        except Exception:
+            pass
+
+    for issue in issues:
+        try:
+            if issue.get("pull_request"):
+                continue
+            created = datetime.strptime(issue["created_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            if issue.get("closed_at"):
+                closed = datetime.strptime(issue["closed_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                close_times.append((closed - created).total_seconds() / 3600)
+        except Exception:
+            pass
+
+    avg_first = round(sum(first_response_times) / len(first_response_times), 1) if first_response_times else 0
+    avg_merge = round(sum(merge_times) / len(merge_times), 1) if merge_times else 0
+    avg_close = round(sum(close_times) / len(close_times), 1) if close_times else 0
+
+    return {
+        "first_response": avg_first,
+        "merge_time": avg_merge,
+        "close_time": avg_close,
+        "stale_prs": stale_prs
+    }
+
+
+def compute_trend_risk(commits: List[Dict]) -> Dict:
+    now = datetime.now(timezone.utc)
+    weekly = []
+    for weeks_ago in range(3, -1, -1):
+        start = now - timedelta(weeks=weeks_ago + 1)
+        end = now - timedelta(weeks=weeks_ago)
+        count = 0
+        for c in commits:
+            try:
+                date_str = c["commit"]["author"]["date"]
+                date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                if start <= date < end:
+                    count += 1
+            except Exception:
+                pass
+        weekly.append(count)
+
+    if len(weekly) >= 2 and weekly[-1] < weekly[0] * 0.5:
+        level, desc = "HIGH", f"Commit activity dropped from {weekly[0]} to {weekly[-1]} this month"
+    elif len(weekly) >= 2 and weekly[-1] > weekly[0] * 1.5:
+        level, desc = "LOW", f"Commit activity rising ({weekly[0]} → {weekly[-1]})"
+    else:
+        level, desc = "MEDIUM", f"Commit activity stable (~{round(sum(weekly)/max(len(weekly),1))} commits/week)"
+
+    return {"level": level, "value": desc}
+
+
+def compute_maintainer_load(contributors: List[Dict]) -> Dict:
+    if not contributors:
+        return {"level": "HIGH", "value": "No contributor data"}
+    total = sum(c.get("contributions", 0) for c in contributors)
+    if total == 0:
+        return {"level": "HIGH", "value": "No contributions found"}
+    top_pct = contributors[0].get("contributions", 0) / total * 100
+    if top_pct > 70:
+        level = "HIGH"
+    elif top_pct > 40:
+        level = "MEDIUM"
+    else:
+        level = "LOW"
+    return {"level": level, "value": f"Top maintainer handles {round(top_pct, 1)}% of commits"}
+
+
 def compute_risk(contributors, prs, issues, commits) -> Dict:
     bus = compute_bus_factor_risk(contributors)
     pr = compute_pr_risk(prs)
     issue = compute_issue_risk(issues)
     activity = compute_activity_risk(commits)
+    trend = compute_trend_risk(commits)
+    maintainer = compute_maintainer_load(contributors)
+    responsiveness = compute_responsiveness(prs, issues)
+
+    resp_score = 100 - min(responsiveness["merge_time"] / 2, 50) - min(responsiveness["stale_prs"] * 2, 50)
+    resp_level = get_level(max(0, 100 - resp_score))
 
     return {
         "summary": {
             "bus_factor": {
                 "level": bus["level"],
-                "value": f"Top contributor {round(bus['top_contributor_pct'],1)}%"
+                "value": f"Top contributor {round(bus['top_contributor_pct'], 1)}%"
             },
             "pr_backlog": {
                 "level": pr["level"],
                 "value": f"{pr['open_prs']} open PRs"
             },
             "trend": {
-                "level": "HIGH",
-                "value": "Rising risk signals"
+                "level": trend["level"],
+                "value": trend["value"]
             },
             "maintainer_load": {
-                "level": "MEDIUM",
-                "value": "Compute later"
+                "level": maintainer["level"],
+                "value": maintainer["value"]
             },
             "responsiveness": {
-                "level": "MEDIUM",
-                "value": "Compute later"
+                "level": resp_level,
+                "value": f"Avg merge {responsiveness['merge_time']}h, {responsiveness['stale_prs']} stale PRs"
             }
         },
 
@@ -212,10 +305,5 @@ def compute_risk(contributors, prs, issues, commits) -> Dict:
         "pr_risk": pr,
         "issue_risk": issue,
         "activity_risk": activity,
-        "responsiveness_detail": {
-            "first_response": 2.5,
-            "merge_time": 4.1,
-            "close_time": 5.2,
-            "stale_prs": 12
-        }
+        "responsiveness_detail": responsiveness
     }
