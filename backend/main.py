@@ -40,6 +40,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from services.github_service import run_startup_validation
+
+@app.on_event("startup")
+def startup_event():
+    run_startup_validation()
+
+
 
 #Endpoints
 
@@ -89,37 +96,42 @@ def test_repo(owner: str, repo: str):
     }
 
 
+from utils.cache import global_cache
+
 @app.get("/commits/{owner}/{repo}")
 def get_commit_analysis(owner: str, repo: str):
-    """
-    Analyze repository commits and return daily commit counts.
+    cache_key = f"endpoint:commits:{owner.lower()}:{repo.lower()}"
+    
+    def fetch():
+        commits = get_commits(owner, repo)
 
-    Args:
-        owner: Repository owner (username or organization)
-        repo: Repository name
+        if commits is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Could not fetch data for repository {owner}/{repo}. "
+                       f"Please check if the repository exists and you are not rate-limited.",
+            )
 
-    Returns:
-        JSON with dates, counts, and total_commits arrays for charting.
-    """
-    commits = get_commits(owner, repo)
+        analysis_result = analyze_commits(commits)
 
-    if commits is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Could not fetch data for repository {owner}/{repo}. "
-                   f"Please check if the repository exists and you are not rate-limited.",
-        )
+        return {
+            "repository": f"{owner}/{repo}",
+            "data": analysis_result,
+        }
 
-    analysis_result = analyze_commits(commits)
+    return global_cache.get_or_fetch(cache_key, fetch)
 
-    return {
-        "repository": f"{owner}/{repo}",
-        "data": analysis_result,
-    }
+
 @app.get("/contributors/{owner}/{repo}")
 def contributors(owner: str, repo: str):
-    raw_data = get_contributors(owner, repo)
-    analyzed = analyze_contributors(raw_data)
-    return analyzed
+    cache_key = f"endpoint:contributors:{owner.lower()}:{repo.lower()}"
+    
+    def fetch():
+        raw_data = get_contributors(owner, repo)
+        analyzed = analyze_contributors(raw_data)
+        return analyzed
+
+    return global_cache.get_or_fetch(cache_key, fetch)
+
 
 

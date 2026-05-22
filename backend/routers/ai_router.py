@@ -13,6 +13,8 @@ from models.ai_model import AISummaryRequest, AISummaryResponse
 router = APIRouter(tags=["AI Analysis"])
 
 
+from utils.cache import global_cache
+
 @router.post("/summary", response_model=AISummaryResponse)
 def get_ai_summary(request: AISummaryRequest):
     """
@@ -31,21 +33,28 @@ def get_ai_summary(request: AISummaryRequest):
     # and to avoid circular imports at module load time.
     from ai.services.repo_ai_analysis import analyze_repository_ai
 
-    try:
-        result = analyze_repository_ai(request.owner, request.repo)
-        return AISummaryResponse(**result)
+    cache_key = f"endpoint:ai_summary:{request.owner.lower()}:{request.repo.lower()}"
 
-    except ValueError as e:
-        # Bad repo name, repo not found, insufficient data
-        raise HTTPException(status_code=404, detail=str(e))
+    def fetch():
+        try:
+            result = analyze_repository_ai(request.owner, request.repo)
+            return result
 
-    except RuntimeError as e:
-        # LLM provider failures (auth, rate limit, connection)
-        raise HTTPException(status_code=502, detail=str(e))
+        except ValueError as e:
+            # Bad repo name, repo not found, insufficient data
+            raise HTTPException(status_code=404, detail=str(e))
 
-    except Exception as e:
-        # Unexpected errors — logged in the service layer
-        raise HTTPException(
-            status_code=500,
-            detail=f"AI analysis failed unexpectedly: {type(e).__name__}",
-        )
+        except RuntimeError as e:
+            # LLM provider failures (auth, rate limit, connection)
+            raise HTTPException(status_code=502, detail=str(e))
+
+        except Exception as e:
+            # Unexpected errors — logged in the service layer
+            raise HTTPException(
+                status_code=500,
+                detail=f"AI analysis failed unexpectedly: {type(e).__name__}",
+            )
+
+    res = global_cache.get_or_fetch(cache_key, fetch)
+    return AISummaryResponse(**res)
+

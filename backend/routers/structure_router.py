@@ -9,20 +9,27 @@ router = APIRouter(
     tags=["Repository Structure"]
 )
 
+from utils.cache import global_cache
+
 @router.get("/structure/{owner}/{repo}")
 def get_structure(owner: str, repo: str):
+    cache_key = f"endpoint:structure:{owner.lower()}:{repo.lower()}"
+    
+    def fetch():
+        tree_data = get_repo_tree(owner, repo)
 
-    tree_data = get_repo_tree(owner, repo)
+        structure = summarize_structure(tree_data)
+        tree = build_tree_structure(tree_data)
 
-    structure = summarize_structure(tree_data)
-    tree = build_tree_structure(tree_data)
+        return {
+            "repository": f"{owner}/{repo}",
+            "total_files": structure["total_files"],
+            "total_folders": structure["total_folders"],
+            "tree": tree
+        }
 
-    return {
-        "repository": f"{owner}/{repo}",
-        "total_files": structure["total_files"],
-        "total_folders": structure["total_folders"],
-        "tree": tree
-    }
+    return global_cache.get_or_fetch(cache_key, fetch)
+
 
 
 @router.get("/file/{owner}/{repo}")
