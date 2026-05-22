@@ -22,6 +22,22 @@ export default function WeekdayChart({ data }) {
         responsive: true,
         plugins: {
             legend: { labels: { color: '#9CB3CC' } },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        if (context.parsed.y >= 100) {
+                            label += '100+';
+                        } else {
+                            label += context.parsed.y;
+                        }
+                        return label;
+                    }
+                }
+            }
         },
         scales: {
             x: {

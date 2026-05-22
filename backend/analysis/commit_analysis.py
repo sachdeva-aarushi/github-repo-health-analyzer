@@ -74,13 +74,13 @@ def analyze_commit_velocity(commits):
 
     df = pd.DataFrame({'date': pd.to_datetime(commit_dates)})
 
-    # Convert to week
-    df['week'] = df['date'].dt.to_period('W').astype(str)
+    # Convert to day
+    df['day'] = df['date'].dt.date.astype(str)
 
-    weekly_counts = df['week'].value_counts().sort_index()
+    daily_counts = df['day'].value_counts().sort_index()
 
     return {
-        "weeks": weekly_counts.index.tolist(),
-        "counts": weekly_counts.values.tolist()
+        "days": daily_counts.index.tolist(),
+        "counts": daily_counts.values.tolist()
     }
 

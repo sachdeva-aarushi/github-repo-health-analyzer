@@ -20,15 +20,15 @@ ChartJS.register(
 );
 
 export default function VelocityChart({ data }) {
-    if (!data || !data.weeks || data.weeks.length === 0) {
+    if (!data || !data.days || data.days.length === 0) {
         return <p style={{ color: '#9CB3CC', textAlign: 'center' }}>No velocity data available.</p>;
     }
 
     const chartData = {
-        labels: data.weeks,
+        labels: data.days,
         datasets: [
             {
-                label: "Commits per Week",
+                label: "Commits per Day",
                 data: data.counts,
                 tension: 0.4,
                 fill: true,
@@ -36,7 +36,7 @@ export default function VelocityChart({ data }) {
                 backgroundColor: "rgba(39, 211, 255, 0.1)",
                 pointBackgroundColor: "#27D3FF",
                 pointBorderColor: "#091525",
-                pointRadius: 4,
+                pointRadius: 3,
                 pointHoverRadius: 6,
                 borderWidth: 2,
             }
@@ -49,6 +49,14 @@ export default function VelocityChart({ data }) {
             legend: {
                 display: true,
                 labels: { color: "#9CB3CC" }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.dataset.label || '';
+                        return `${label}: ${context.parsed.y}`;
+                    }
+                }
             }
         },
         scales: {
@@ -57,7 +65,8 @@ export default function VelocityChart({ data }) {
                 grid: { color: "rgba(39, 211, 255, 0.06)" }
             },
             y: {
-                ticks: { color: "#9CB3CC" },
+                beginAtZero: true,
+                ticks: { color: "#9CB3CC", stepSize: 1 },
                 grid: { color: "rgba(39, 211, 255, 0.06)" }
             }
         }

@@ -24,7 +24,25 @@ function ContributorsBarChart({ data }) {
             }}
             options={{
                 responsive: true,
-                plugins: { legend: { labels: { color: '#9CB3CC' } } },
+                plugins: {
+                    legend: { labels: { color: '#9CB3CC' } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y >= 100) {
+                                    label += '100+';
+                                } else {
+                                    label += context.parsed.y;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
                 scales: {
                     x: { ticks: { color: '#9CB3CC' }, grid: { color: 'rgba(39, 211, 255, 0.06)' } },
                     y: { ticks: { color: '#9CB3CC' }, grid: { color: 'rgba(39, 211, 255, 0.06)' } },

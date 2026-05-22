@@ -222,20 +222,7 @@ def analyze_health(commits, contributors, prs, issues, files=None):
             "name": path,
             "status": status
         })
-    recent = df[df["date"] > (datetime.now(timezone.utc) - pd.Timedelta(days=30))]
-    older = df[df["date"] <= (datetime.now(timezone.utc) - pd.Timedelta(days=30))]
 
-    recent_rate = len(recent)
-    older_rate = len(older)
-
-    if recent_rate > older_rate * 1.5:
-        phase = "Growth"
-    elif recent_rate < older_rate * 0.5:
-        phase = "Decline"
-    elif days_since > 30:
-        phase = "Inactive"
-    else:
-        phase = "Stable"
 
     top_contributors = contrib_df.head(5)
 
@@ -254,7 +241,6 @@ def analyze_health(commits, contributors, prs, issues, files=None):
         "status": status,
         "dependency_heatmap": heatmap,
         "workload": workload,
-        "phase": phase,
 
         "summary": {
             "last_commit_days": days_since,

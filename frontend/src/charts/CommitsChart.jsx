@@ -57,6 +57,22 @@ function CommitsChart({ dates, counts, repository }) {
                 font: { size: 14, weight: '600', family: 'Sora' },
                 color: '#F4F8FF',
             },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        if (context.parsed.y >= 100) {
+                            label += '100+';
+                        } else {
+                            label += context.parsed.y;
+                        }
+                        return label;
+                    }
+                }
+            }
         },
         scales: {
             x: {

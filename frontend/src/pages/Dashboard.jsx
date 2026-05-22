@@ -86,8 +86,8 @@ function Dashboard() {
                                 <div className="risk-summary-level">{data.data.summary.avg_commits_per_day}</div>
                             </div>
                             <div className="risk-summary-card border-shade-2 card-border-shade-2">
-                                <div className="risk-summary-title">Commit Std Dev</div>
-                                <div className="risk-summary-level">{data.data.summary.std_dev_commits}</div>
+                                <div className="risk-summary-title">Total Commits</div>
+                                <div className="risk-summary-level">{data.data.total_commits >= 100 ? "100+" : data.data.total_commits}</div>
                             </div>
                             {overview && (
                                 <>
@@ -111,7 +111,7 @@ function Dashboard() {
                     <div className="dashboard-graphs-grid">
                         <div className="risk-card border-shade-1 card-border-shade-1">
                             <div className="risk-card-header">
-                                <div className="risk-card-title-container">Commit Activity</div>
+                                <div className="risk-card-title-container">Commit Activity ({data.data.total_commits >= 100 ? "100+" : data.data.total_commits} commits)</div>
                             </div>
                             <div style={{ marginTop: '16px' }}>
                                 <CommitsChart
@@ -151,7 +151,7 @@ function Dashboard() {
                         {velocity && (
                             <div className="risk-card border-shade-4 card-border-shade-4">
                                 <div className="risk-card-header">
-                                    <div className="risk-card-title-container">Commit Velocity (Weekly)</div>
+                                    <div className="risk-card-title-container">Commit Velocity (Daily)</div>
                                 </div>
                                 <div style={{ marginTop: '16px' }}>
                                     <VelocityChart data={velocity} />

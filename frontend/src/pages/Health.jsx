@@ -65,10 +65,7 @@ export default function Health() {
                 <main className="dashboard-main-content">
 
 
-            {/* ===== OVERALL HEALTH ===== */}
-            <h3 className="section-title" style={{ textAlign: 'center' }}>Overall Health</h3>
-
-            <div className="health-grid">
+            <div className="health-grid" style={{ paddingTop: 0, marginTop: 0 }}>
 
                 {/* Health Score */}
                 <div className="health-card border-shade-1 card-border-shade-1">
@@ -104,21 +101,6 @@ export default function Health() {
                     <span className="subtext">activity recency</span>
                 </div>
 
-            </div>
-
-            {/* ===== RISK SIGNALS ===== */}
-            <h3 className="section-title" style={{ textAlign: 'center' }}>Risk Signals</h3>
-
-            <div className="risk-list">
-                {health.risk_signals.length === 0 ? (
-                    <div className="risk-item low" style={{ textAlign: 'center' }}>No risk signals detected. Repository is stable.</div>
-                ) : (
-                    health.risk_signals.map((r, i) => (
-                        <div key={i} className={`risk-item ${r.status}`}>
-                            {r.name}
-                        </div>
-                    ))
-                )}
             </div>
             {/* ===== VISUAL ANALYTICS ===== */}
             <h3 className="section-title" style={{ textAlign: 'center' }}>Health Insights</h3>
@@ -162,21 +144,10 @@ export default function Health() {
                 )}
 
             </div>
-            {/* ===== NEW ANALYTICS ===== */}
-            <div className="health-visual-grid">
-
-                {/* Evolution Phase */}
-                <div className="visual-card border-shade-5 card-border-shade-5">
-                    <h4>Repository Phase</h4>
-                    <p className="phase-text">{health.phase}</p>
-                </div>
-
-                {/* Dependency Heatmap */}
-                <div className="visual-card border-shade-1 card-border-shade-1">
-                    <h4>Dependency Health</h4>
-                    <DependencyHeatmap data={health.dependency_heatmap} repo={repo} />
-                </div>
-
+            {/* ===== DEPENDENCY HEATMAP (full width) ===== */}
+            <div className="visual-card border-shade-1 card-border-shade-1" style={{ marginTop: '10px' }}>
+                <h4>Dependency Health</h4>
+                <DependencyHeatmap data={health.dependency_heatmap} repo={repo} />
             </div>
 
             <div className="visual-card border-shade-2 card-border-shade-2" style={{ marginTop: "20px" }}>
