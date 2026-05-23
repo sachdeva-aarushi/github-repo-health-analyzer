@@ -81,15 +81,18 @@ def run_startup_validation() -> Dict[str, Any]:
     Performs startup verification of GITHUB_TOKEN and rate limit status.
     Prints a clear diagnostic report to the console.
     """
+    import sys
     token = os.getenv("GITHUB_TOKEN")
     print("\n" + "="*50)
     print(" GITINTEL STARTUP VALIDATION: GITHUB AUTHENTICATION")
     print("="*50)
+    sys.stdout.flush()
     
     if not token:
         print("[WARNING] GITHUB_TOKEN is missing in the environment or .env file.")
         print("[WARNING] Requests will be unauthenticated and limited to 60 requests/hour.")
         print("="*50 + "\n")
+        sys.stdout.flush()
         return {
             "status": "missing",
             "authenticated": False,
@@ -104,6 +107,7 @@ def run_startup_validation() -> Dict[str, Any]:
             print("[ERROR] GITHUB_TOKEN was loaded but is INVALID (Authentication Failure).")
             print("[ERROR] GitHub API returned 401 Unauthorized.")
             print("="*50 + "\n")
+            sys.stdout.flush()
             return {
                 "status": "invalid",
                 "authenticated": False,
@@ -121,6 +125,7 @@ def run_startup_validation() -> Dict[str, Any]:
             print(f"[SUCCESS] Authenticated Rate Limit: {limit} requests/hour (Authenticated).")
             print(f"[STATUS] Remaining requests: {remaining}/{limit}")
             print("="*50 + "\n")
+            sys.stdout.flush()
             return {
                 "status": "valid",
                 "authenticated": True,
@@ -132,6 +137,7 @@ def run_startup_validation() -> Dict[str, Any]:
             print("[WARNING] Token was accepted but rate limit is unexpectedly low.")
             print(f"[WARNING] Rate Limit: {limit} requests/hour (Possibly unauthenticated).")
             print("="*50 + "\n")
+            sys.stdout.flush()
             return {
                 "status": "low_limit",
                 "authenticated": False,
@@ -142,11 +148,13 @@ def run_startup_validation() -> Dict[str, Any]:
     except requests.exceptions.RequestException as e:
         print(f"[ERROR] Failed to connect to GitHub API during startup validation: {e}")
         print("="*50 + "\n")
+        sys.stdout.flush()
         return {
             "status": "connection_error",
             "authenticated": False,
             "message": f"Connection error: {e}"
         }
+
 
 
 def get_commits(owner: str, repo: str, per_page: int = 100) -> Optional[List[Dict]]:

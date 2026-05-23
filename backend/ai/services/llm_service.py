@@ -17,10 +17,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Supported provider identifiers
-_PROVIDER_GROQ = "groq"
-_PROVIDER_NVIDIA = "nvidia"
+_PROVIDER_GEMINI = "gemini"
 
-_DEFAULT_PROVIDER = _PROVIDER_GROQ
+_DEFAULT_PROVIDER = _PROVIDER_GEMINI
 
 
 def generate_llm_response(
@@ -32,9 +31,6 @@ def generate_llm_response(
     """
     Route an LLM request to the configured provider.
 
-    Provider is selected via the PROVIDER environment variable.
-    Defaults to 'groq' if not set.
-
     Args:
         user_prompt: The data/context prompt for the model.
         system_prompt: Role/persona instructions for the model.
@@ -45,22 +41,54 @@ def generate_llm_response(
         Generated text response from the LLM.
 
     Raises:
-        ValueError: If an unknown provider is configured.
         RuntimeError: If the provider call fails.
     """
+    # Enforce Gemini as the only active provider
     provider = os.getenv("PROVIDER", _DEFAULT_PROVIDER).lower().strip()
-    logger.info("LLM request routed to provider: %s", provider)
+    if provider != _PROVIDER_GEMINI:
+        logger.warning("Provider '%s' is deprecated/unsupported. Forcing route to Gemini.", provider)
+    
+    logger.info("LLM request routed to Gemini provider.")
+    from ai.providers.gemini_provider import generate_response
+    return generate_response(user_prompt, system_prompt, max_tokens, temperature)
 
-    if provider == _PROVIDER_GROQ:
-        from ai.providers.groq_provider import generate_response
-        return generate_response(user_prompt, system_prompt, max_tokens, temperature)
 
-    elif provider == _PROVIDER_NVIDIA:
-        from ai.providers.nvidia_provider import generate_response
-        return generate_response(user_prompt, system_prompt, max_tokens, temperature)
+def run_gemini_validation():
+    """
+    Validates Gemini API Key on application startup.
+    Prints status information directly to console.
+    """
+    import sys
+    print("\n" + "="*50)
+    print(" GITINTEL STARTUP VALIDATION: GEMINI LLM PROVIDER")
+    print("="*50)
+    sys.stdout.flush()
+    
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        print("[ERROR] GEMINI_API_KEY is missing in the environment or .env file.")
+        print("[ERROR] AI analysis features will fail.")
+        print("="*50 + "\n")
+        sys.stdout.flush()
+        return False
+        
+    import google.generativeai as genai
+    try:
+        genai.configure(api_key=api_key)
+        # Attempt to list models to verify the key works
+        models = list(genai.list_models())
+        default_model = os.getenv("MODEL_NAME", "gemini-2.5-flash")
+        
+        print("[SUCCESS] GEMINI_API_KEY loaded successfully!")
+        print(f"[SUCCESS] Gemini connection verified. Default Model: {default_model}")
+        print("="*50 + "\n")
+        sys.stdout.flush()
+        return True
+    except Exception as e:
+        print("[ERROR] GEMINI_API_KEY is loaded but is INVALID (Authentication Failure).")
+        print(f"[ERROR] Gemini API Error: {e}")
+        print("="*50 + "\n")
+        sys.stdout.flush()
+        return False
 
-    else:
-        raise ValueError(
-            f"Unknown LLM provider: '{provider}'. "
-            f"Set PROVIDER to one of: {_PROVIDER_GROQ}, {_PROVIDER_NVIDIA}"
-        )
+

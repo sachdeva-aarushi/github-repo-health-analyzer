@@ -58,3 +58,37 @@ def get_ai_summary(request: AISummaryRequest):
     res = global_cache.get_or_fetch(cache_key, fetch)
     return AISummaryResponse(**res)
 
+
+from models.ai_model import AIQuestionRequest, AIQuestionResponse
+
+@router.post("/question", response_model=AIQuestionResponse)
+def get_ai_question(request: AIQuestionRequest):
+    """
+    Answer a user question about a repository using its metrics.
+    """
+    from ai.services.repo_ai_analysis import ask_repository_question_ai
+
+    # Generate a cache key that includes the lower-cased owner, repo, and question text
+    cache_key = f"endpoint:ai_question:{request.owner.lower()}:{request.repo.lower()}:{request.question.lower().strip()}"
+
+    def fetch():
+        try:
+            result = ask_repository_question_ai(request.owner, request.repo, request.question)
+            return result
+
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+
+        except RuntimeError as e:
+            raise HTTPException(status_code=502, detail=str(e))
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"AI Q&A failed unexpectedly: {type(e).__name__}",
+            )
+
+    res = global_cache.get_or_fetch(cache_key, fetch)
+    return AIQuestionResponse(**res)
+
+

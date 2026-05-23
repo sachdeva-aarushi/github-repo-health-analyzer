@@ -141,5 +141,76 @@ def analyze_repository_ai(owner: str, repo: str) -> Dict[str, Any]:
         "repo": repo,
         "ai_summary": ai_summary,
         "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
-        "model_used": os.getenv("MODEL_NAME", "llama3-8b-8192"),
+        "model_used": os.getenv("MODEL_NAME", "gemini-2.5-flash"),
     }
+
+
+def ask_repository_question_ai(owner: str, repo: str, question: str) -> Dict[str, Any]:
+    """
+    Answer a specific user question about a repository using its metrics.
+    """
+    logger.info("Answering AI question for %s/%s: %s", owner, repo, question[:50])
+
+    try:
+        commits = get_commits(owner, repo) or []
+        contributors = get_contributors(owner, repo) or []
+        pull_requests = get_pull_requests(owner, repo) or []
+        issues = get_issues(owner, repo) or []
+        repo_metadata = get_repo_metadata(owner, repo)
+    except Exception as e:
+        logger.error("Failed to fetch data for %s/%s: %s", owner, repo, e)
+        raise ValueError(f"Could not fetch repository data for {owner}/{repo}: {e}")
+
+    if not repo_metadata:
+        raise ValueError(f"Repository {owner}/{repo} not found or is inaccessible.")
+
+    languages = {}
+    structure = {"total_files": 0, "total_folders": 0}
+    try:
+        languages = get_repo_languages(owner, repo) or {}
+        tree = get_repo_tree(owner, repo)
+        structure = analyze_repo_structure(tree)
+    except Exception:
+        pass
+
+    health_data = analyze_health(commits, contributors, pull_requests, issues)
+    contributor_data = analyze_contributors(contributors) if contributors else {}
+    risk_data = compute_risk(contributors, pull_requests, issues, commits)
+    evolution_data = summarize_repository(
+        metadata=repo_metadata,
+        languages=languages,
+        structure=structure,
+        pull_requests=pull_requests,
+        issues=issues,
+    )
+
+    context = build_context(
+        health_data=health_data,
+        contributor_data=contributor_data,
+        risk_data=risk_data,
+        evolution_data=evolution_data,
+        repo_metadata=repo_metadata,
+    )
+
+    user_prompt = (
+        f"Repository Metrics Context:\n{context}\n\n"
+        f"User Question:\n{question}\n\n"
+        f"Answer the user's question clearly, constructively, and concisely using only the repository metrics provided."
+    )
+
+    import os
+    answer = generate_llm_response(
+        user_prompt=user_prompt,
+        system_prompt=_SYSTEM_PROMPT,
+        max_tokens=int(os.getenv("MAX_TOKENS", "1024")),
+        temperature=float(os.getenv("TEMPERATURE", "0.3")),
+    )
+
+    return {
+        "owner": owner,
+        "repo": repo,
+        "question": question,
+        "answer": answer,
+        "model_used": os.getenv("MODEL_NAME", "gemini-2.5-flash"),
+    }
+

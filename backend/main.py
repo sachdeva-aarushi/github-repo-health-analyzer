@@ -41,10 +41,13 @@ app.add_middleware(
 )
 
 from services.github_service import run_startup_validation
+from ai.services.llm_service import run_gemini_validation
 
 @app.on_event("startup")
 def startup_event():
     run_startup_validation()
+    run_gemini_validation()
+
 
 
 
@@ -132,6 +135,42 @@ def contributors(owner: str, repo: str):
         return analyzed
 
     return global_cache.get_or_fetch(cache_key, fetch)
+
+
+import time
+from ai.services.llm_service import generate_llm_response
+
+@app.post("/api/ai/test")
+@app.post("/ai/test")
+def test_ai_connection():
+    """
+    Lightweight health-check endpoint that sends a minimal prompt to Gemini
+    and returns latency and model information.
+    """
+    start_time = time.time()
+    try:
+        response = generate_llm_response(
+            user_prompt="Respond with 'success'",
+            system_prompt="You are a validation tester. Respond ONLY with the word 'success'.",
+            max_tokens=10,
+            temperature=0.0
+        )
+        latency = time.time() - start_time
+        return {
+            "status": "success",
+            "model": os.getenv("MODEL_NAME", "gemini-2.5-flash"),
+            "latency_seconds": round(latency, 3),
+            "response": response.strip()
+        }
+    except Exception as e:
+        latency = time.time() - start_time
+        return {
+            "status": "failure",
+            "model": os.getenv("MODEL_NAME", "gemini-2.5-flash"),
+            "latency_seconds": round(latency, 3),
+            "error": str(e)
+        }
+
 
 
 

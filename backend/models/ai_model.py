@@ -25,3 +25,20 @@ class AISummaryResponse(BaseModel):
     ai_summary: str = Field(..., description="AI-narrated analysis of the repository.")
     analysis_timestamp: str = Field(..., description="ISO 8601 UTC timestamp of analysis.")
     model_used: str = Field(..., description="LLM model identifier used to generate the summary.")
+
+
+class AIQuestionRequest(BaseModel):
+    """Request body for POST /ai/question."""
+    owner: str = Field(..., min_length=1, max_length=100, description="GitHub repository owner.")
+    repo: str = Field(..., min_length=1, max_length=100, description="GitHub repository name.")
+    question: str = Field(..., min_length=1, max_length=1000, description="The user's question.")
+
+
+class AIQuestionResponse(BaseModel):
+    """Successful response from POST /ai/question."""
+    owner: str = Field(..., description="GitHub repository owner.")
+    repo: str = Field(..., description="GitHub repository name.")
+    question: str = Field(..., description="The user's question.")
+    answer: str = Field(..., description="AI's response.")
+    model_used: str = Field(..., description="LLM model identifier used.")
+

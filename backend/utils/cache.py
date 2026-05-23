@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
 
 class RepoCache:
-    def __init__(self, default_ttl: int = 21600):
+    def __init__(self, default_ttl: int = 10800):
         self.default_ttl = default_ttl
         self._cache: Dict[str, Dict[str, Any]] = {}
         self._lock = threading.Lock()

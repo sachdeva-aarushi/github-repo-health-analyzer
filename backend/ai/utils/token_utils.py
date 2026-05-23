@@ -7,9 +7,10 @@ token usage and truncate context sections that would exceed model limits.
 
 
 # Conservative token budget for the context passed to the LLM.
-# Most Groq-hosted models support 8k context; we cap at 3000 to
-# leave room for the prompt template + model response.
-MAX_CONTEXT_TOKENS = 3000
+# Gemini models support huge contexts; we cap at 3000 to keep
+# response generation extremely fast and minimize API latency.
+MAX_CONTEXT_TOKENS = 6000
+
 
 
 def estimate_tokens(text: str) -> int:
