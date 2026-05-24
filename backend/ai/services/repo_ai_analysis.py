@@ -1,14 +1,14 @@
-"""
+﻿"""
 AI-powered repository analysis orchestrator.
 
 This is the main business logic service for AI narration.
 It coordinates the flow:
-    GitHub API → Deterministic Analyzers → Context Builder → LLM → Narrated Insights
+    GitHub API â†’ Deterministic Analyzers â†’ Context Builder â†’ LLM â†’ Narrated Insights
 
 RULES:
 - All GitHub API fetches are grouped here (single point of fetch per request).
 - Existing analyzers are called but NEVER modified.
-- AI layer only interprets — it does not replace analytics.
+- AI layer only interprets â€” it does not replace analytics.
 - LLM calls go through llm_service (not directly to a provider).
 """
 
@@ -32,18 +32,23 @@ from analysis.evolution_analysis import summarize_repository, analyze_repo_struc
 
 from ai.services.context_builder import build_context
 from ai.services.llm_service import generate_llm_response
-from ai.utils.prompt_loader import load_prompt
+from ai.utils.prompt_loader import load_prompt, load_system_prompt
+
+from ai.core.orchestrator import AIOrchestrator
+from ai.utils.prompt_loader import load_system_prompt
+from ai.memory.session_memory import session_store
 
 logger = logging.getLogger(__name__)
 
-# System prompt establishes the AI's role and strict boundaries.
-_SYSTEM_PROMPT = (
-    "You are a senior software architect. "
-    "You interpret structured repository analytics and narrate insights clearly. "
-    "You do NOT have access to the raw source code. "
-    "Base your analysis ONLY on the metrics provided. "
-    "Be balanced, constructive, and actionable."
-)
+# NEW ARCHITECTURE: Authoritative GitIntel Repository Intelligence Analyst system prompt.
+try:
+    _SYSTEM_PROMPT = load_system_prompt("analyst")
+except Exception:
+    _SYSTEM_PROMPT = (
+        "You are the GitIntel Repository Intelligence Analyst. "
+        "Ground every answer in the Dashboard Snapshot and Structured Insights. "
+        "Never claim data is missing when it exists in the provided context."
+    )
 
 
 def analyze_repository_ai(owner: str, repo: str) -> Dict[str, Any]:
@@ -82,7 +87,7 @@ def analyze_repository_ai(owner: str, repo: str) -> Dict[str, Any]:
     if not repo_metadata:
         raise ValueError(f"Repository {owner}/{repo} not found or is inaccessible.")
 
-    # Fetch structure data separately — these are optional for the AI context.
+    # Fetch structure data separately â€” these are optional for the AI context.
     languages = {}
     structure = {"total_files": 0, "total_folders": 0}
     try:
@@ -93,7 +98,7 @@ def analyze_repository_ai(owner: str, repo: str) -> Dict[str, Any]:
         logger.warning("Could not fetch language/structure data for %s/%s", owner, repo)
 
     # ------------------------------------------------------------------
-    # Step 2: Run deterministic analyzers (source of truth — untouched).
+    # Step 2: Run deterministic analyzers (source of truth â€” untouched).
     # ------------------------------------------------------------------
     health_data = analyze_health(commits, contributors, pull_requests, issues)
     contributor_data = analyze_contributors(contributors) if contributors else {}
@@ -145,7 +150,7 @@ def analyze_repository_ai(owner: str, repo: str) -> Dict[str, Any]:
     }
 
 
-def ask_repository_question_ai(owner: str, repo: str, question: str) -> Dict[str, Any]:
+def ask_repository_question_ai(owner: str, repo: str, question: str, dashboard_context: dict | None = None, session_id: str | None = None) -> Dict[str, Any]:
     """
     Answer a specific user question about a repository using its metrics.
     """
@@ -184,33 +189,72 @@ def ask_repository_question_ai(owner: str, repo: str, question: str) -> Dict[str
         issues=issues,
     )
 
-    context = build_context(
-        health_data=health_data,
-        contributor_data=contributor_data,
-        risk_data=risk_data,
-        evolution_data=evolution_data,
-        repo_metadata=repo_metadata,
-    )
+    # ------------------------------------------------------------------
+    # NEW ARCHITECTURE PATH (v2) — Dashboard Snapshot + Structured Intelligence + Orchestrator
+    # ------------------------------------------------------------------
+    orchestrator_used = False
+    try:
+        from ai.core.orchestrator import AIOrchestrator
+        orchestrator = AIOrchestrator()
 
-    user_prompt = (
-        f"Repository Metrics Context:\n{context}\n\n"
-        f"User Question:\n{question}\n\n"
-        f"Answer the user's question clearly, constructively, and concisely using only the repository metrics provided."
-    )
+        package = orchestrator.build_context_package(
+            owner=owner,
+            repo=repo,
+            user_question=question,
+            health_data=health_data,
+            contributor_data=contributor_data,
+            risk_data=risk_data,
+            evolution_data=evolution_data,
+            frontend_snapshot=dashboard_context,
+            session_id=session_id,
+        )
+        user_prompt = orchestrator.render_prompt(package)
 
-    import os
-    answer = generate_llm_response(
-        user_prompt=user_prompt,
-        system_prompt=_SYSTEM_PROMPT,
-        max_tokens=int(os.getenv("MAX_TOKENS", "1024")),
-        temperature=float(os.getenv("TEMPERATURE", "0.3")),
-    )
+        import os
+        answer = generate_llm_response(
+            user_prompt=user_prompt,
+            system_prompt=_SYSTEM_PROMPT,
+            max_tokens=int(os.getenv("MAX_TOKENS", "1536")),
+            temperature=float(os.getenv("TEMPERATURE", "0.25")),
+        )
 
-    return {
+        orchestrator.record_turn(session_id, package, answer)
+        orchestrator_used = True
+
+    except Exception as exc:
+        # Graceful degradation to the original simple flow
+        logger.warning("Orchestrator path failed, falling back: %s", exc)
+        from ai.services.context_builder import build_context as legacy_build_context
+        context = legacy_build_context(
+            health_data=health_data,
+            contributor_data=contributor_data,
+            risk_data=risk_data,
+            evolution_data=evolution_data,
+            repo_metadata=repo_metadata,
+        )
+        user_prompt = (
+            f"Repository Metrics Context:\n{context}\n\n"
+            f"User Question:\n{question}\n\n"
+            "Answer using the repository metrics. Reference visible charts when the question mentions them."
+        )
+        import os
+        answer = generate_llm_response(
+            user_prompt=user_prompt,
+            system_prompt=_SYSTEM_PROMPT,
+            max_tokens=int(os.getenv("MAX_TOKENS", "1024")),
+            temperature=float(os.getenv("TEMPERATURE", "0.3")),
+        )
+
+    result = {
         "owner": owner,
         "repo": repo,
         "question": question,
         "answer": answer,
         "model_used": os.getenv("MODEL_NAME", "gemini-2.5-flash"),
     }
+    if orchestrator_used:
+        result["architecture"] = "v2_orchestrator"
+    else:
+        result["architecture"] = "legacy_fallback"
+    return result
 

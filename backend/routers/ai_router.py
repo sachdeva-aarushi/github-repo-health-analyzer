@@ -73,7 +73,13 @@ def get_ai_question(request: AIQuestionRequest):
 
     def fetch():
         try:
-            result = ask_repository_question_ai(request.owner, request.repo, request.question)
+            result = ask_repository_question_ai(
+                request.owner,
+                request.repo,
+                request.question,
+                dashboard_context=getattr(request, "dashboard_context", None),
+                session_id=getattr(request, "session_id", None),
+            )
             return result
 
         except ValueError as e:

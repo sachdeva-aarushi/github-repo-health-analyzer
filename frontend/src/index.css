@@ -233,6 +233,22 @@ body {
     text-decoration: none;
     font-size: 1.3rem;
     transition: opacity 0.25s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar-logo-img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(39, 211, 255, 0.6)) drop-shadow(0 0 20px rgba(39, 211, 255, 0.3));
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.navbar-logo:hover .navbar-logo-img {
+    filter: drop-shadow(0 0 16px rgba(39, 211, 255, 0.9)) drop-shadow(0 0 30px rgba(39, 211, 255, 0.5));
+    transform: scale(1.12);
 }
 
 .navbar-logo:hover {

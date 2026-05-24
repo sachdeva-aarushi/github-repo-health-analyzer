@@ -1,62 +1,47 @@
-"""
-Prompt template loader utility.
+﻿"""
+Prompt template loader utility (enhanced for new AI architecture).
 
-Loads prompt templates from the prompts/ directory and provides
-basic sanitization for user-supplied data injected into prompts.
+Supports legacy flat prompts + new structured system under prompts/system/
 """
-
 import os
 import re
 
-# Resolved once at import — points to backend/ai/prompts/
-_PROMPTS_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "prompts"
-)
+_PROMPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "prompts")
 
 
 def load_prompt(prompt_name: str) -> str:
-    """
-    Load a prompt template from the prompts directory.
-
-    Args:
-        prompt_name: Name of the prompt file (without .txt extension).
-
-    Returns:
-        The raw template string with placeholders intact.
-
-    Raises:
-        FileNotFoundError: If the prompt template does not exist.
-    """
+    """Legacy flat prompt loader (backward compatible)."""
     prompt_path = os.path.join(_PROMPTS_DIR, f"{prompt_name}.txt")
-
     if not os.path.exists(prompt_path):
-        raise FileNotFoundError(
-            f"Prompt template '{prompt_name}' not found at {prompt_path}"
-        )
-
+        raise FileNotFoundError(f"Prompt template '{prompt_name}' not found at {prompt_path}")
     with open(prompt_path, "r", encoding="utf-8") as f:
         return f.read()
 
 
+def load_system_prompt(name: str = "analyst") -> str:
+    """Load the permanent system role prompt for the GitIntel Analyst."""
+    path = os.path.join(_PROMPTS_DIR, "system", f"{name}.txt")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"System prompt '{name}' not found at {path}")
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read().strip()
+
+
+def load_structured_template(name: str = "question") -> str:
+    """Load structured context/user section templates."""
+    path = os.path.join(_PROMPTS_DIR, "templates", f"{name}.txt")
+    if not os.path.exists(path):
+        path = os.path.join(_PROMPTS_DIR, f"{name}.txt")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Structured template '{name}' not found")
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
 def sanitize_user_content(text: str, max_length: int = 500) -> str:
-    """
-    Sanitize user-controlled text before injecting into a prompt.
-
-    Strips control characters, limits length, and wraps in delimiters
-    to reduce prompt injection risk.
-
-    Args:
-        text: Raw user-supplied text (e.g. repo description).
-        max_length: Maximum allowed character length.
-
-    Returns:
-        Sanitized text string.
-    """
     if not text:
         return ""
-    # Strip control characters
     cleaned = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", text)
-    # Truncate
     if len(cleaned) > max_length:
         cleaned = cleaned[:max_length] + "..."
     return cleaned

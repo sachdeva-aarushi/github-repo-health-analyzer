@@ -9,6 +9,7 @@ function Navbar({ owner, repo }) {
         <nav className="navbar">
             <div className="navbar-brand">
                 <NavLink to="/" className="navbar-logo">
+                    <img src="/logo.png" alt="GitIntel logo" className="navbar-logo-img" />
                     GitIntel
                 </NavLink>
             </div>

@@ -32,6 +32,9 @@ class AIQuestionRequest(BaseModel):
     owner: str = Field(..., min_length=1, max_length=100, description="GitHub repository owner.")
     repo: str = Field(..., min_length=1, max_length=100, description="GitHub repository name.")
     question: str = Field(..., min_length=1, max_length=1000, description="The user's question.")
+    # NEW in v2 architecture
+    dashboard_context: dict | None = None
+    session_id: str | None = None
 
 
 class AIQuestionResponse(BaseModel):
