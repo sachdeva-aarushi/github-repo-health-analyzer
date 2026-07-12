@@ -9,7 +9,7 @@ def normalize(value, min_val, max_val):
     return max(0, min(100, (value - min_val) / (max_val - min_val) * 100))
 
 
-def analyze_health(commits, contributors, prs, issues, files=None):
+def analyze_health(commits, contributors, prs, issues, files=None, actual_open_issues: int = None, actual_open_prs: int = None):
     commit_dates = []
 
     for c in commits:
@@ -91,13 +91,16 @@ def analyze_health(commits, contributors, prs, issues, files=None):
     else:
         pr_score = 50
 
-    open_issues = sum(1 for i in issues if i["state"] == "open")
+    # Counts
+    open_issues = actual_open_issues if actual_open_issues is not None else sum(1 for i in issues if i["state"] == "open")
     closed_issues = sum(1 for i in issues if i["state"] == "closed")
 
-    total_issues = open_issues + closed_issues
+    # Close rate should be calculated from recent issues sample to represent current resolution speed
+    sample_open_issues = sum(1 for i in issues if i["state"] == "open")
+    sample_total_issues = sample_open_issues + closed_issues
 
-    if total_issues > 0:
-        close_rate = (closed_issues / total_issues) * 100
+    if sample_total_issues > 0:
+        close_rate = (closed_issues / sample_total_issues) * 100
     else:
         close_rate = 0
 

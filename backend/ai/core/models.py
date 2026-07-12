@@ -109,6 +109,8 @@ class AIContextPackage(BaseModel):
     conversation_history: List[Dict[str, Any]] = Field(default_factory=list, description="Prior turns in this session")
     repository: str
     owner: str
+    repo_context_summary: Optional[str] = None
+
 
 
 # -----------------------------------------------------------------------------

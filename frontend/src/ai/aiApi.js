@@ -29,13 +29,13 @@ export async function fetchAISummary(owner, repo) {
  * @param {string} question - Question to ask
  * @returns {Promise<Object>} AI answer response
  */
-export async function askRepositoryQuestion(owner, repo, question) {
+export async function askRepositoryQuestion(owner, repo, question, viewState = null) {
     const response = await fetch(`${API_BASE_URL}/ai/question`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ owner, repo, question })
+        body: JSON.stringify({ owner, repo, question, dashboard_context: viewState })
     });
 
     if (!response.ok) {

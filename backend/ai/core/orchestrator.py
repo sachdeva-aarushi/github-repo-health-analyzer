@@ -74,6 +74,7 @@ class AIOrchestrator:
         contributor_data: Optional[Dict[str, Any]] = None,
         risk_data: Optional[Dict[str, Any]] = None,
         evolution_data: Optional[Dict[str, Any]] = None,
+        repo_metadata: Optional[Dict[str, Any]] = None,
         frontend_snapshot: Optional[Dict[str, Any]] = None,
         session_id: Optional[str] = None,
         page: str = "overview",
@@ -83,14 +84,25 @@ class AIOrchestrator:
         """
 
         # 1. Snapshot: prefer frontend if provided, otherwise synthesize
+        snapshot = None
         if frontend_snapshot:
-            try:
-                snapshot = DashboardSnapshot(**frontend_snapshot)
-            except Exception as exc:
-                logger.warning("Invalid frontend snapshot, falling back to synthesis: %s", exc)
+            # Check if it has a complete DashboardSnapshot signature
+            if "repository" in frontend_snapshot and "widget_data" in frontend_snapshot:
+                try:
+                    snapshot = DashboardSnapshot(**frontend_snapshot)
+                except Exception as exc:
+                    logger.warning("Invalid full frontend snapshot structure: %s", exc)
+            
+            # If not a complete/valid full snapshot, treat as lightweight metadata
+            if not snapshot:
+                page_val = frontend_snapshot.get("activeTab") or frontend_snapshot.get("activePage") or frontend_snapshot.get("page") or page
                 snapshot = synthesize_snapshot_from_analytics(
-                    owner, repo, health_data, contributor_data, risk_data, evolution_data, page=page
+                    owner, repo, health_data, contributor_data, risk_data, evolution_data, page=page_val
                 )
+                # Store all extra lightweight metadata in active_filters
+                for k, v in frontend_snapshot.items():
+                    if k not in ("page", "activeTab", "activePage", "repository"):
+                        snapshot.active_filters[k] = v
         else:
             snapshot = synthesize_snapshot_from_analytics(
                 owner, repo, health_data, contributor_data, risk_data, evolution_data, page=page
@@ -117,6 +129,16 @@ class AIOrchestrator:
             session = session_store.get_or_create(session_id, f"{owner}/{repo}")
             history = [turn.model_dump() for turn in session.turns[-4:]]  # last 4 turns
 
+        # Compute the compact context summary
+        from ai.services.context_builder import build_compact_analysis_summary
+        repo_context_summary = build_compact_analysis_summary(
+            health_data=health_data,
+            contributor_data=contributor_data,
+            risk_data=risk_data,
+            evolution_data=evolution_data,
+            repo_metadata=repo_metadata,
+        )
+
         package = AIContextPackage(
             user_question=user_question,
             dashboard_snapshot=snapshot,
@@ -125,6 +147,7 @@ class AIOrchestrator:
             conversation_history=history,
             repository=f"{owner}/{repo}",
             owner=owner,
+            repo_context_summary=repo_context_summary,
         )
 
         logger.info("Orchestrator built context package for %s/%s (session=%s)", owner, repo, session_id)
@@ -139,64 +162,58 @@ class AIOrchestrator:
         """
         lines: List[str] = []
 
-        # --- CONTEXT SECTION ---
-        lines.append("=== DASHBOARD SNAPSHOT ===")
+        # --- ROLE & INSTRUCTIONS ---
+        lines.append("=== ROLE & INSTRUCTIONS ===")
+        lines.append(
+            "You are the GitIntel Repository Intelligence Analyst — an expert AI system specialized in "
+            "interpreting GitHub repository health, contributor dynamics, risk signals, and long-term project sustainability.\n"
+            "Rules:\n"
+            "- Ground every answer in the Repository Analysis Context and Current UI View State provided below.\n"
+            "- Reference specific metrics, values, and filenames where available.\n"
+            "- Distinguish between hard numbers and logical implications.\n"
+            "- End substantive answers with 1-2 concrete, actionable recommendations."
+        )
+        lines.append("")
+
+        # --- REPOSITORY ANALYSIS CONTEXT ---
+        lines.append("=== REPOSITORY ANALYSIS CONTEXT ===")
+        if package.repo_context_summary:
+            lines.append(package.repo_context_summary)
+        else:
+            lines.append("- No detailed repository metrics context available.")
+        lines.append("")
+
+        # --- CURRENT UI VIEW STATE ---
+        lines.append("=== CURRENT UI VIEW STATE ===")
         if package.dashboard_snapshot:
             snap = package.dashboard_snapshot
-            lines.append(f"Active Page: {snap.page}")
-            lines.append(f"Repository: {snap.repository}")
-            lines.append(f"Date Range: {snap.date_range}")
-            lines.append(f"Visible Widgets: {', '.join(snap.visible_widgets) or 'None explicitly listed'}")
+            lines.append(f"- Active Page/Tab: {snap.page}")
+            if snap.active_filters:
+                for k, v in snap.active_filters.items():
+                    if v is not None:
+                        formatted_key = k.replace("_", " ")
+                        if formatted_key and formatted_key[0].islower():
+                            formatted_key = formatted_key.title()
+                        lines.append(f"- {formatted_key}: {v}")
+            else:
+                lines.append("- No active filters or selected items.")
+        else:
+            lines.append("- No active UI snapshot state.")
+        lines.append("")
 
-            # Include key widget analytical meaning + data (truncated for tokens)
-            for wid, w in list(snap.widget_data.items())[:6]:
-                lines.append(f"\n[Widget: {w.title}]")
-                lines.append(f"Analytical Meaning: {w.analytical_meaning}")
-                # Only include small data summaries
-                data_summary = self._summarize_widget_data(w.data)
-                if data_summary:
-                    lines.append(f"Current Values: {data_summary}")
-
-            # Top-level metrics
-            if snap.metrics:
-                lines.append(f"\nKey Metrics: {self._summarize_dict(snap.metrics)}")
-
-            if snap.contributor_stats:
-                lines.append(f"Contributor Stats: {self._summarize_dict(snap.contributor_stats)}")
-
-        lines.append("\n=== STRUCTURED INTELLIGENCE INSIGHTS ===")
-        ins = package.structured_insights
-        lines.append(f"Contributor Concentration: {ins.contributor_concentration}")
-        lines.append(f"Bus Factor Risk: {ins.bus_factor_risk}")
-        lines.append(f"Activity Trend: {ins.activity_trend}")
-        lines.append(f"Review Bottleneck Risk: {ins.review_bottleneck_risk}")
-        lines.append(f"Issue Backlog Risk: {ins.issue_backlog_risk}")
-        lines.append(f"Overall Health Signal: {ins.overall_health_signal}")
-        if ins.key_risks:
-            lines.append(f"Key Risks Identified: {', '.join(ins.key_risks)}")
-        if ins.key_strengths:
-            lines.append(f"Key Strengths Identified: {', '.join(ins.key_strengths)}")
-
-        if package.relevant_metrics:
-            lines.append("\n=== RELEVANT REPOSITORY METRICS ===")
-            lines.append(self._summarize_dict(package.relevant_metrics))
-
+        # --- CONVERSATION HISTORY ---
+        lines.append("=== CONVERSATION HISTORY ===")
         if package.conversation_history:
-            lines.append("\n=== CONVERSATION HISTORY (last turns) ===")
             for turn in package.conversation_history[-3:]:
-                lines.append(f"Q: {turn.get('question', '')[:120]}")
-                lines.append(f"A (summary): {turn.get('answer_summary', '')[:180]}")
+                lines.append(f"Q: {turn.get('question', '')}")
+                lines.append(f"A (summary): {turn.get('answer_summary', '')}")
+        else:
+            lines.append("- No prior history in this chat session.")
+        lines.append("")
 
-        # --- USER SECTION ---
-        lines.append("\n=== CURRENT USER QUESTION ===")
+        # --- CURRENT USER QUESTION ---
+        lines.append("=== CURRENT USER QUESTION ===")
         lines.append(package.user_question)
-
-        lines.append(
-            "\n\nInstructions: Answer as the GitIntel Repository Intelligence Analyst. "
-            "Reference the dashboard snapshot and the pre-computed structured insights. "
-            "Never claim data is missing if it appears in the snapshot above. "
-            "Be specific, use actual numbers and widget names when available."
-        )
 
         return "\n".join(lines)
 

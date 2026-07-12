@@ -84,6 +84,7 @@ function Structure() {
                             owner={owner} 
                             repo={repo} 
                             pageContext="Structure"
+                            selectedFile={selectedFile}
                             quickPrompts={structurePrompts}
                         />
                     </aside>

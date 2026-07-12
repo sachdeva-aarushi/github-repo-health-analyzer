@@ -14,7 +14,6 @@ import HealthDonut from "../charts/healthdonut";
 import DimensionBars from "../charts/dimensionchart";
 import HealthTimeline from "../charts/healthtimeline";
 import IssuePRChart from "../charts/issuePRchart";
-import DependencyHeatmap from "../charts/dependencyheatmap";
 import MaintainerWorkload from "../charts/maintainerworkload";
 
 export default function Health() {
@@ -143,11 +142,6 @@ export default function Health() {
                     </div>
                 )}
 
-            </div>
-            {/* ===== DEPENDENCY HEATMAP (full width) ===== */}
-            <div className="visual-card border-shade-1 card-border-shade-1" style={{ marginTop: '10px' }}>
-                <h4>Dependency Health</h4>
-                <DependencyHeatmap data={health.dependency_heatmap} repo={repo} />
             </div>
 
             <div className="visual-card border-shade-2 card-border-shade-2" style={{ marginTop: "20px" }}>

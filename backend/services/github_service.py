@@ -76,6 +76,92 @@ def _fetch_github_api(url: str, params: Dict = None, cache_key: str = None) -> A
         return None
 
 
+def _fetch_github_count(url: str, params: Dict = None, cache_key: str = None) -> int:
+    """
+    Fetch total count from the GitHub Link header using a fast per_page=1 request.
+    Supports caching using global_cache.
+    """
+    if not cache_key:
+        cache_key = f"github_api_count:{url}:{str(params)}"
+
+    def do_fetch():
+        start_time = time.time()
+        headers = _get_headers()
+        try:
+            response = requests.get(url, params=params, headers=headers, timeout=15)
+            duration = time.time() - start_time
+            
+            # Print rate limit diagnostic logs
+            limit = response.headers.get("X-RateLimit-Limit")
+            remaining = response.headers.get("X-RateLimit-Remaining")
+            reset = response.headers.get("X-RateLimit-Reset")
+            print(f"[GitHub API Count] Fetch: {url} | Params: {params} | Status: {response.status_code} | "
+                  f"Duration: {duration:.3f}s | Limit: {limit} | Remaining: {remaining} | Reset: {reset}")
+            
+            response.raise_for_status()
+            
+            link = response.headers.get("Link")
+            if not link:
+                return len(response.json())
+            
+            import re
+            match = re.search(r'<([^>]+)>;\s*rel="last"', link)
+            if match:
+                from urllib.parse import urlparse, parse_qs
+                url_last = match.group(1)
+                parsed = urlparse(url_last)
+                q = parse_qs(parsed.query)
+                page = q.get("page")
+                if page:
+                    return int(page[0])
+            
+            # If there's no last, check if there's a next link
+            match_next = re.search(r'<([^>]+)>;\s*rel="next"', link)
+            if match_next:
+                return 2
+                
+            return len(response.json())
+        except Exception as e:
+            print(f"[GitHub API Count] Error fetching {url}: {e}")
+            raise e
+
+    is_hit = [True]
+    def on_cache_hit():
+        is_hit[0] = True
+        print(f"[GitHub API Count] Cache HIT: {url} | Params: {params}")
+
+    is_hit[0] = False
+    
+    try:
+        data = global_cache.get_or_fetch(
+            key=cache_key,
+            fetch_fn=do_fetch,
+            cache_hit_callback=on_cache_hit
+        )
+        if not is_hit[0]:
+            print(f"[GitHub API Count] Cache MISS: {url} | Params: {params}")
+        return data
+    except Exception:
+        return 0
+
+
+def get_open_prs_count(owner: str, repo: str) -> int:
+    """Get the total count of open pull requests using Link header pagination."""
+    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls"
+    params = {"state": "open", "per_page": 1}
+    cache_key = f"github:open_prs_count:{owner}:{repo}"
+    return _fetch_github_count(url, params, cache_key)
+
+
+def get_closed_prs_count(owner: str, repo: str) -> int:
+    """Get the total count of closed pull requests using Link header pagination."""
+    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}/pulls"
+    params = {"state": "closed", "per_page": 1}
+    cache_key = f"github:closed_prs_count:{owner}:{repo}"
+    return _fetch_github_count(url, params, cache_key)
+
+
+
 def run_startup_validation() -> Dict[str, Any]:
     """
     Performs startup verification of GITHUB_TOKEN and rate limit status.

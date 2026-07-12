@@ -1,4 +1,4 @@
-﻿"""
+"""
 AI-powered repository analysis orchestrator.
 
 This is the main business logic service for AI narration.
@@ -24,6 +24,7 @@ from services.github_service import (
     get_repo_metadata,
     get_repo_languages,
     get_repo_tree,
+    get_open_prs_count,
 )
 from analysis.health_analysis import analyze_health
 from analysis.contributor_analysis import analyze_contributors
@@ -87,28 +88,56 @@ def analyze_repository_ai(owner: str, repo: str) -> Dict[str, Any]:
     if not repo_metadata:
         raise ValueError(f"Repository {owner}/{repo} not found or is inaccessible.")
 
+    # Get canonical owner and repo in case of redirects
+    canonical_owner, canonical_repo = owner, repo
+    if repo_metadata and "full_name" in repo_metadata:
+        parts = repo_metadata["full_name"].split("/")
+        if len(parts) == 2:
+            canonical_owner, canonical_repo = parts[0], parts[1]
+
     # Fetch structure data separately â€” these are optional for the AI context.
     languages = {}
     structure = {"total_files": 0, "total_folders": 0}
     try:
-        languages = get_repo_languages(owner, repo) or {}
-        tree = get_repo_tree(owner, repo)
+        languages = get_repo_languages(canonical_owner, canonical_repo) or {}
+        tree = get_repo_tree(canonical_owner, canonical_repo)
         structure = analyze_repo_structure(tree)
     except Exception:
-        logger.warning("Could not fetch language/structure data for %s/%s", owner, repo)
+        logger.warning("Could not fetch language/structure data for %s/%s", canonical_owner, canonical_repo)
+
+    # Fetch actual open PRs count and calculate open issues count
+    actual_open_prs = get_open_prs_count(canonical_owner, canonical_repo)
+    open_issues_and_prs = repo_metadata.get("open_issues_count", 0) if repo_metadata else 0
+    actual_open_issues = max(0, open_issues_and_prs - actual_open_prs)
 
     # ------------------------------------------------------------------
     # Step 2: Run deterministic analyzers (source of truth â€” untouched).
     # ------------------------------------------------------------------
-    health_data = analyze_health(commits, contributors, pull_requests, issues)
+    health_data = analyze_health(
+        commits, 
+        contributors, 
+        pull_requests, 
+        issues, 
+        actual_open_issues=actual_open_issues, 
+        actual_open_prs=actual_open_prs
+    )
     contributor_data = analyze_contributors(contributors) if contributors else {}
-    risk_data = compute_risk(contributors, pull_requests, issues, commits)
+    risk_data = compute_risk(
+        contributors, 
+        pull_requests, 
+        issues, 
+        commits, 
+        actual_open_prs=actual_open_prs, 
+        actual_open_issues=actual_open_issues
+    )
     evolution_data = summarize_repository(
         metadata=repo_metadata,
         languages=languages,
         structure=structure,
         pull_requests=pull_requests,
         issues=issues,
+        actual_open_prs=actual_open_prs,
+        actual_open_issues=actual_open_issues,
     )
 
     # ------------------------------------------------------------------
@@ -169,24 +198,52 @@ def ask_repository_question_ai(owner: str, repo: str, question: str, dashboard_c
     if not repo_metadata:
         raise ValueError(f"Repository {owner}/{repo} not found or is inaccessible.")
 
+    # Get canonical owner and repo in case of redirects
+    canonical_owner, canonical_repo = owner, repo
+    if repo_metadata and "full_name" in repo_metadata:
+        parts = repo_metadata["full_name"].split("/")
+        if len(parts) == 2:
+            canonical_owner, canonical_repo = parts[0], parts[1]
+
     languages = {}
     structure = {"total_files": 0, "total_folders": 0}
     try:
-        languages = get_repo_languages(owner, repo) or {}
-        tree = get_repo_tree(owner, repo)
+        languages = get_repo_languages(canonical_owner, canonical_repo) or {}
+        tree = get_repo_tree(canonical_owner, canonical_repo)
         structure = analyze_repo_structure(tree)
     except Exception:
         pass
 
-    health_data = analyze_health(commits, contributors, pull_requests, issues)
+    # Fetch actual open PRs count and calculate open issues count
+    actual_open_prs = get_open_prs_count(canonical_owner, canonical_repo)
+    open_issues_and_prs = repo_metadata.get("open_issues_count", 0) if repo_metadata else 0
+    actual_open_issues = max(0, open_issues_and_prs - actual_open_prs)
+
+    health_data = analyze_health(
+        commits, 
+        contributors, 
+        pull_requests, 
+        issues, 
+        actual_open_issues=actual_open_issues, 
+        actual_open_prs=actual_open_prs
+    )
     contributor_data = analyze_contributors(contributors) if contributors else {}
-    risk_data = compute_risk(contributors, pull_requests, issues, commits)
+    risk_data = compute_risk(
+        contributors, 
+        pull_requests, 
+        issues, 
+        commits, 
+        actual_open_prs=actual_open_prs, 
+        actual_open_issues=actual_open_issues
+    )
     evolution_data = summarize_repository(
         metadata=repo_metadata,
         languages=languages,
         structure=structure,
         pull_requests=pull_requests,
         issues=issues,
+        actual_open_prs=actual_open_prs,
+        actual_open_issues=actual_open_issues,
     )
 
     # ------------------------------------------------------------------
@@ -205,6 +262,7 @@ def ask_repository_question_ai(owner: str, repo: str, question: str, dashboard_c
             contributor_data=contributor_data,
             risk_data=risk_data,
             evolution_data=evolution_data,
+            repo_metadata=repo_metadata,
             frontend_snapshot=dashboard_context,
             session_id=session_id,
         )

@@ -58,11 +58,11 @@ def compute_bus_factor_risk(contributor_data: List[Dict]) -> Dict:
     }
 
 
-def compute_pr_risk(prs: List[Dict]) -> Dict:
+def compute_pr_risk(prs: List[Dict], actual_open_prs: int = None) -> Dict:
     open_prs = [p for p in prs if p["state"] == "open"]
     closed_prs = [p for p in prs if p["state"] == "closed"]
 
-    open_count = len(open_prs)
+    open_count = actual_open_prs if actual_open_prs is not None else len(open_prs)
     closed_count = len(closed_prs)
 
     if closed_count == 0:
@@ -111,11 +111,11 @@ def compute_pr_risk(prs: List[Dict]) -> Dict:
     }
 
 
-def compute_issue_risk(issues: List[Dict]) -> Dict:
+def compute_issue_risk(issues: List[Dict], actual_open_issues: int = None) -> Dict:
     open_issues = [i for i in issues if i["state"] == "open"]
     closed_issues = [i for i in issues if i["state"] == "closed"]
 
-    open_count = len(open_issues)
+    open_count = actual_open_issues if actual_open_issues is not None else len(open_issues)
     closed_count = len(closed_issues)
 
     if closed_count == 0:
@@ -265,10 +265,10 @@ def compute_maintainer_load(contributors: List[Dict]) -> Dict:
     return {"level": level, "value": f"Top maintainer handles {round(top_pct, 1)}% of commits"}
 
 
-def compute_risk(contributors, prs, issues, commits) -> Dict:
+def compute_risk(contributors, prs, issues, commits, actual_open_prs: int = None, actual_open_issues: int = None) -> Dict:
     bus = compute_bus_factor_risk(contributors)
-    pr = compute_pr_risk(prs)
-    issue = compute_issue_risk(issues)
+    pr = compute_pr_risk(prs, actual_open_prs=actual_open_prs)
+    issue = compute_issue_risk(issues, actual_open_issues=actual_open_issues)
     activity = compute_activity_risk(commits)
     trend = compute_trend_risk(commits)
     maintainer = compute_maintainer_load(contributors)

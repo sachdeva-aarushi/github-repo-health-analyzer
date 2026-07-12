@@ -3,7 +3,7 @@ import { fetchAISummary, askRepositoryQuestion } from '../../ai/aiApi';
 import AIMessage from './AIMessage';
 import AIInsightCard from './AIInsightCard';
 
-function AIChatPanel({ owner, repo, pageContext = 'Dashboard', quickPrompts = [] }) {
+function AIChatPanel({ owner, repo, pageContext = 'Dashboard', quickPrompts = [], selectedFile = null }) {
     const [messages, setMessages] = useState([]);
     const [summary, setSummary] = useState(null);
     const [inputValue, setInputValue] = useState('');
@@ -49,9 +49,12 @@ function AIChatPanel({ owner, repo, pageContext = 'Dashboard', quickPrompts = []
         setIsTyping(true);
 
         try {
-            // Optional: prepend context to the text sent to backend if needed
-            const questionText = pageContext !== 'Dashboard' ? `[Focus: ${pageContext}] ${userMsg}` : userMsg;
-            const res = await askRepositoryQuestion(owner, repo, questionText);
+            // Lightweight metadata about view state (active tab, selected file)
+            const viewState = {
+                activeTab: pageContext,
+                selectedFile: selectedFile || null
+            };
+            const res = await askRepositoryQuestion(owner, repo, userMsg, viewState);
             const answer = res.answer || res.response || res.ai_summary || "I'm sorry, I couldn't process that request.";
             setMessages(prev => [...prev, { role: 'ai', content: answer }]);
         } catch (err) {
