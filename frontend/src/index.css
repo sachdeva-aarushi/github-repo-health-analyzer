@@ -239,8 +239,9 @@ body {
 }
 
 .navbar-logo-img {
-    width: 44px;
-    height: 44px;
+    width: 54px;
+    height: 54px;
+    margin-right: -4px;
     object-fit: contain;
     filter: drop-shadow(0 0 10px rgba(39, 211, 255, 0.6)) drop-shadow(0 0 20px rgba(39, 211, 255, 0.3));
     transition: filter 0.3s ease, transform 0.3s ease;
@@ -636,20 +637,50 @@ body {
 }
 
 .card-border-shade-1 {
-    border: 1px solid rgba(39, 211, 255, 0.25) !important;
+    border: 1px solid rgba(39, 211, 255, 0.22) !important;
+    border-top: 4px solid #27D3FF !important;
 }
+.card-border-shade-1:hover {
+    border-color: rgba(39, 211, 255, 0.5) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(39, 211, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
 .card-border-shade-2 {
-    border: 1px solid rgba(83, 168, 255, 0.25) !important;
+    border: 1px solid rgba(83, 168, 255, 0.22) !important;
+    border-top: 4px solid #53A8FF !important;
 }
+.card-border-shade-2:hover {
+    border-color: rgba(83, 168, 255, 0.5) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(83, 168, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
 .card-border-shade-3 {
-    border: 1px solid rgba(59, 130, 246, 0.25) !important;
+    border: 1px solid rgba(59, 130, 246, 0.22) !important;
+    border-top: 4px solid #3B82F6 !important;
 }
+.card-border-shade-3:hover {
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(59, 130, 246, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
 .card-border-shade-4 {
     border: 1px solid rgba(28, 93, 122, 0.25) !important;
+    border-top: 4px solid #1C5D7A !important;
 }
+.card-border-shade-4:hover {
+    border-color: rgba(28, 93, 122, 0.5) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(28, 93, 122, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
 .card-border-shade-5 {
-    border: 1px solid rgba(0, 229, 255, 0.25) !important;
+    border: 1px solid rgba(0, 229, 255, 0.22) !important;
+    border-top: 4px solid #00E5FF !important;
 }
+.card-border-shade-5:hover {
+    border-color: rgba(0, 229, 255, 0.5) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 229, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
 
 .risk-summary-title {
     font-size: 14px;
@@ -1294,5 +1325,5 @@ h1, h2, h3, h4, h5, h6, .app-title, .chart-card h3, .risk-card-title-container, 
     box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 
                 0 0 30px rgba(39, 211, 255, 0.22), 
                 inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    border-color: rgba(39, 211, 255, 0.4) !important;
+    border-color: rgba(39, 211, 255, 0.4);
 }

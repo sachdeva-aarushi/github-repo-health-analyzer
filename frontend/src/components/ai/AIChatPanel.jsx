@@ -78,12 +78,7 @@ function AIChatPanel({ owner, repo, pageContext = 'Dashboard', quickPrompts = []
             </div>
             
             <div className="ai-messages-area">
-                {summary && pageContext === 'Dashboard' && (
-                    <AIInsightCard 
-                        title="Repository Intelligence" 
-                        content={summary} 
-                    />
-                )}
+
                 
                 {messages.map((msg, idx) => (
                     <AIMessage key={idx} role={msg.role} content={msg.content} />

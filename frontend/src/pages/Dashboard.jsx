@@ -172,13 +172,7 @@ function Dashboard() {
                         </div>
                     )}
 
-                    {/* Raw JSON toggle */}
-                    <details className="json-toggle" style={{ marginTop: '40px' }}>
-                        <summary>View Raw JSON Data</summary>
-                        <pre className="json-pre">
-                            {JSON.stringify(data, null, 2)}
-                        </pre>
-                    </details>
+
                 </div>
                     </main>
                 </div>
