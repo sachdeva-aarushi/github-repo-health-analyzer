@@ -24,9 +24,18 @@ function DashboardPreview() {
                     transformStyle: 'preserve-3d'
                 }}
             >
-                <div style={{ transform: 'translateZ(40px)', textShadow: '0 8px 16px rgba(0,0,0,0.5)', fontSize: '1.25rem', fontWeight: 600 }}>
-                    [ Dashboard UI Preview Placeholder ]
-                </div>
+                <img 
+                    src="/dashboard-preview.png" 
+                    alt="GitIntel Dashboard — Risk analysis view showing bus factor, PR backlog, trend risk metrics and AI chat panel"
+                    style={{ 
+                        width: '100%', 
+                        height: 'auto', 
+                        borderRadius: '12px', 
+                        display: 'block',
+                        transform: 'translateZ(40px)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 255, 255, 0.08)'
+                    }}
+                />
             </motion.div>
         </section>
     );
