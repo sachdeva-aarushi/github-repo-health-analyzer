@@ -4,7 +4,7 @@
   <em>An AI-powered intelligence and health analysis platform for GitHub repositories.</em>
 </p>
 
-## 🚀 Overview
+## Overview
 
 The **GitHub Repository Health Analyzer** is an advanced full-stack platform designed to extract, analyze, and narrate the operational health, maintainability, and risk profile of open-source repositories. 
 
@@ -12,7 +12,7 @@ Going beyond standard vanity metrics (stars and forks), this platform leverages 
 
 **Key Differentiation:** This is *not* a generic codebase chatbot. The architecture strictly separates deterministic quantitative analysis from qualitative LLM interpretation, ensuring that the AI layer acts as an intelligence synthesizer rather than a black-box analyzer.
 
-## ✨ Core Features
+## Core Features
 
 * **Deterministic Health Scoring:** Computes holistic repository health based on commit frequency, PR velocity, issue resolution rates, and recency.
 * **Contributor Risk Assessment:** Calculates the "bus factor" and visualizes workload distribution using Lorenz curves to identify over-reliance on single developers.
@@ -20,7 +20,7 @@ Going beyond standard vanity metrics (stars and forks), this platform leverages 
 * **AI-Powered Insights Narration:** Synthesizes raw metrics into human-readable, architect-level narratives and actionable recommendations.
 * **High-Performance Dashboard:** Interactive, real-time visualizations powered by Chart.js.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Frontend Architecture
 * **Framework:** React.js
@@ -39,7 +39,7 @@ Going beyond standard vanity metrics (stars and forks), this platform leverages 
 * **Integration:** OpenAI-compatible inference architecture
 * **Engineering:** Custom context-building engine, externalized prompt templates, token-aware truncation
 
-## 📐 System Architecture
+## System Architecture
 
 The system is designed around a **Modular Service-Oriented Backend** emphasizing separation of concerns, scalability, and maintainability.
 
@@ -74,7 +74,7 @@ graph TD
 4. **Token-Aware Context Building:** Sending entire codebases to an LLM is inefficient and error-prone. The `context_builder.py` aggregates and compresses the outputs of the deterministic engine, ensuring the LLM receives high-signal, low-noise context while strictly adhering to token budgets.
 5. **Externalized Prompts:** Prompts are stored as `.txt` templates, decoupled from Python code. This allows prompt engineers to iterate independently of backend deployment cycles.
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 github-repo-health-analyzer/
@@ -98,7 +98,7 @@ github-repo-health-analyzer/
 │       └── prompts/           # Externalized prompt templates
 ```
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 * Node.js (v18+)
@@ -149,7 +149,7 @@ github-repo-health-analyzer/
    npm start
    ```
 
-## 🔌 Core API Endpoints
+## Core API Endpoints
 
 * `GET /health` - API system health and GitHub rate-limit status.
 * `GET /repo/health/{owner}/{repo}` - Comprehensive repository health metrics.
@@ -157,7 +157,7 @@ github-repo-health-analyzer/
 * `GET /commits/{owner}/{repo}` - Commit frequency and velocity analysis.
 * `POST /ai/summary` - Generates an AI narration based on the repository's deterministic metrics.
 
-## 🗺 Future Roadmap
+## Future Roadmap
 
 * **Caching Layer:** Implement Redis or in-memory TTL caching for GitHub API responses to optimize rate limit consumption.
 * **Webhooks Integration:** Support for real-time repository analysis via GitHub Webhooks.
@@ -166,5 +166,5 @@ github-repo-health-analyzer/
 
 ---
 <p align="center">
-  Designed with a focus on scalable architecture and clean engineering principles.
+  Built with ❤️ for developers and contributors.
 </p>
